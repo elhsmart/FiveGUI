@@ -3,7 +3,8 @@
 /////////////////////////////////////////
 
 FiveGUI.GUIElement = function () {
-    this.eventListeners = { }
+    this.eventListeners = { };
+    this.mountCanvas = document.createElement("canvas");
     return this;
 }
 

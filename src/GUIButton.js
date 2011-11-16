@@ -4,6 +4,8 @@
 
 FiveGUI.GUIButton = function () {
     this.eventListeners = { }
+    this.mountCanvas = document.createElement("canvas");
+    return this;
 }
 FiveGUI.GUILib.extend(FiveGUI.GUIButton, FiveGUI.GUIElement);
 
@@ -91,12 +93,39 @@ FiveGUI.GUIButton.prototype.addEventListener = function(type, func){
     }
 }
 
+FiveGUI.GUIButton.prototype.isMountCanvasFilled = function(isFilled) {
+    if(typeof isFilled == "undefined") {
+        if(typeof this.filled == "undefined") {
+            this.filled = false;
+        }
+    } else {
+        switch(isFilled) {
+            case true:
+            case false: {
+                this.filled = isFilled;
+            }
+        }
+    }
+    return this.filled;
+}
+FiveGUI.GUIButton.prototype.fillMountCanvas = function(ctx) {
+    if(!this.isMountCanvasFilled()) {
+        var mountCtx = this.mountCanvas.getContext("2d");
+        mountCtx.putImageData (
+            ctx.getImageData(
+                this.getX()-2, this.getY()-2, this.getWidth()+4, this.getHeight()+4
+            ), 0, 0);    
+        this.isMountCanvasFilled(true);
+    }
+}
+
 FiveGUI.GUIButton.prototype.bindListeners = function() {
     this.addEventListener("mouseover", function(e, obj){
         obj.changeState("hovered");
         obj.draw(obj.getContext());
     });
     this.addEventListener("mouseout", function(e, obj){
+        obj.getContext().drawImage(obj.mountCanvas, obj.getX()-2, obj.getY()-2);
         obj.changeState("normal");
         obj.draw(obj.getContext());
     });    
@@ -126,6 +155,9 @@ FiveGUI.GUIButton.prototype.changeState = function(state) {
 }
 
 FiveGUI.GUIButton.prototype.draw = function(c) {
+    
+    this.fillMountCanvas(this.parent.getContext());
+    
     var ctx = this.ctx;
     ctx.clearRect (this.getX()-1, this.getY()-1, this.getWidth()+2, this.getHeight()+2);
     
@@ -188,7 +220,6 @@ FiveGUI.GUIButton.prototype.draw = function(c) {
         ctx.textBaseline = "middle";
         
         ctx.fillText(caption, this.getX()+(this.getWidth()/2), this.getY()+(this.getHeight()/2));
-//        ctx.fillText(caption, this.getX(), this.getY());
     }
     ctx.restore();
     
