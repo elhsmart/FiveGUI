@@ -1,69 +1,87 @@
+/////////////////////////////////////////
+////////////// MAIN /////////////////////
+/////////////////////////////////////////
+
 "use strict";
+
 var FiveGUI = FiveGUI = FiveGUI || {};
 
 FiveGUI.GUI = function(parameters) {
-    this.defaults = {};
     
-    // desktop flags
-    this.mousePos = null;
-    this.mouseDown = false;
-    this.mouseUp = false;
+    this.defaults   = { };
+    this.mainCanvas = null;
+    this.mainCtx    = null;
+    this.elements   = new Array();
     
-    if(typeof parameters == "string") {
-        this.canvas = $("#"+parameters).get(0);
-    } else if(typeof parameters == "object") {
+    this.mousePos   = null;
+    this.mouseDown  = false;
+    this.mouseUp    = false;    
+    
+    if(typeof parameters == "object") {
         var a = null;
         for(a in parameters) {
             switch(a) {
-                case "canvasId": {
-                    this.canvas =  $("#"+parameters[a]).get(0);
+                case "canvas": {
+                    this.mainCanvas = document.getElementById(parameters[a]);
                     break;
                 }
                 default: {
                     this.defaults[a] = parameters[a];
                 }
             }
-        }
+        }        
     }
     
-    if(this.canvas != undefined) {
-        this.ctx = this.canvas.getContext("2d");
+    if(typeof parameters == "string") {
+        this.mainCanvas = document.getElementById(parameters);
     }
     
-    this.elements = new Array();
+    if(typeof this.mainCanvas != "object" || !(this.mainCanvas instanceof HTMLCanvasElement)) {
+        throw new Error("Please provide valid HTMLCanvasElement for GUI");
+    }
+    
+    this.mainCtx = this.mainCanvas.getContext("2d");
     this.listen();
 }
 
+FiveGUI.GUI.prototype.getX = function() {
+    return 0;
+}
+
+FiveGUI.GUI.prototype.getY = function() {
+    return 0;
+}
+
 FiveGUI.GUI.prototype.getContext = function() {
-    return this.ctx;
+    return this.mainCtx;
 }
 
 FiveGUI.GUI.prototype.listen = function(){
     var that = this;
     
     // desktop events
-    this.canvas.addEventListener("mousedown", function(evt){
+    this.mainCanvas.addEventListener("mousedown", function(evt){
         that.mouseDown = true;
         that.handleEvent(evt);
     }, false);
     
-    this.canvas.addEventListener("mousemove", function(evt){
+    this.mainCanvas.addEventListener("mousemove", function(evt){
         that.mouseUp = false;
         that.mouseDown = false;
         that.handleEvent(evt);
     }, false);
     
-    this.canvas.addEventListener("mouseup", function(evt){
+    this.mainCanvas.addEventListener("mouseup", function(evt){
         that.mouseUp = true;
         that.mouseDown = false;
         that.handleEvent(evt);
     }, false);
     
-    this.canvas.addEventListener("mouseover", function(evt){
+    this.mainCanvas.addEventListener("mouseover", function(evt){
         that.handleEvent(evt);
     }, false);
     
-    this.canvas.addEventListener("mouseout", function(evt){
+    this.mainCanvas.addEventListener("mouseout", function(evt){
         that.mousePos = null;
     }, false);
 };
@@ -92,7 +110,7 @@ FiveGUI.GUI.prototype.handleEvent = function(evt){
         var a           = null;
 
         if(typeof el != "undefined" && element.isVisible()) {
-            if (pos !== null && element.ctx.isPointInPath(pos.x, pos.y)) {
+            if (pos !== null && element.eventCtx.isPointInPath(pos.x, pos.y)) {
                 // handle onmousedown	
                 if (this.mouseDown) {
                     this.mouseDown = false;
@@ -169,28 +187,18 @@ FiveGUI.GUI.prototype.handleEvent = function(evt){
 };
 
 FiveGUI.GUI.prototype.addElement = function(element) {
+    
     var a = null;
     for(a in this.defaults) {
-        var methodName = "set"+a.capitalize();
+        var methodName = "set"+FiveGUI.GUILib.capitalize(a);
         if(typeof element[methodName] == "function") {
-            if(element["get"+a.capitalize()]() == undefined) {
+            if(element["get"+FiveGUI.GUILib.capitalize(a)]() == undefined) {
                 element[methodName](this.defaults[a]);
             }
         }
     }
     
-    if(typeof element['bindListeners'] == "function") {
-        element.bindListeners();
-    }
-    
-    element.parent = this;
-    
-    element.canvas                  = document.createElement('canvas');
-    element.ctx                     = element.canvas.getContext('2d');
-    
-    element.canvas.width            = this.canvas.width;
-    element.canvas.height           = this.canvas.height;
-    element.canvas.style.position   = 'absolute';
+    element.initialize(this);
     
     if(typeof element.elements == "object") {
         element.bindSubElements(this.defaults);
@@ -200,14 +208,8 @@ FiveGUI.GUI.prototype.addElement = function(element) {
 }
 
 FiveGUI.GUI.prototype.drawGUI = function() {
-    if(this.data == undefined) {
-        this.data = this.ctx.getImageData (
-            0, 0, 
-            this.canvas.width, this.canvas.height
-        );
-    }
-    
+    var a = null;
     for(a in this.elements) {
-        this.elements[a].draw(this.ctx);
+        this.mainCtx.drawImage(this.elements[a].draw(), this.elements[a].getX(), this.elements[a].getY());
     }
 }

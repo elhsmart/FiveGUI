@@ -1,15 +1,77 @@
 /////////////////////////////////////////
 //////////// REGION /////////////////////
 /////////////////////////////////////////
-FiveGUI.GUIRegion = function () {    
+FiveGUI.GUIRegion = function (parameters) {    
     
     this.mousePos = null;
     this.mouseDown = false;
     this.mouseUp = false;
     
     this.elements = new Array();
+    this.eventListeners = { };
+    
+    this.drawCanvas = document.createElement("canvas");
+    this.eventCanvas = document.createElement("canvas");
+
+    this.drawCtx = this.drawCanvas.getContext('2d');
+    this.eventCtx = this.eventCanvas.getContext('2d');
+    
+    this.mount = null;
+
+    this.x = 0;
+    this.y = 0;
+    this.width = 0;
+    this.height = 0;
+    
+    if(typeof parameters == "object") {
+        var a = null;
+        for(a in parameters) {
+            if(typeof this["set"+FiveGUI.GUILib.capitalize(a)] == "function") {
+                this["set"+FiveGUI.GUILib.capitalize(a)](parameters[a]);
+            }
+        }
+    }    
+    return this;
 }
 FiveGUI.GUILib.extend(FiveGUI.GUIRegion, FiveGUI.GUIElement);
+
+//GETTERS
+FiveGUI.GUIRegion.prototype.getContext = function() {
+    return this.drawCtx;
+}
+
+//SETTERS
+
+//PROPERTIES
+
+//METHODS
+FiveGUI.GUIRegion.prototype.update = function() {
+    if(typeof this.parent.drawGUI == "function") {
+        this.parent.drawGUI();
+    } else {
+        this.parent.update();
+    }
+}
+
+FiveGUI.GUIRegion.prototype.initialize = function(parent) {    
+    this.parent = parent;
+    
+    if(this.getWidth() == 0 || this.getHeight() == 0) {
+        throw new Error("Please provide valid dimensions for element GUI Region");
+    }
+    
+    this.drawCanvas.width = this.getWidth();
+    this.drawCanvas.height = this.getHeight();
+    this.drawCanvas.style.position = 'absolute';    
+        
+    var a = null;
+    for(a in this.defaults) {
+        methodName = "get"+FiveGUI.GUILib.capitalize(a);
+        if(typeof this[methodName]() == "undefined") {
+            this["set"+FiveGUI.GUILib.capitalize(a)](this.defaults[a]);
+        }
+    }
+}
 
 FiveGUI.GUIRegion.prototype.addElement = function(element) {
     this.elements.push(element);
@@ -41,18 +103,7 @@ FiveGUI.GUIRegion.prototype.bindSubElements = function(defaults) {
             }
         }
 
-        if(typeof this.elements[b]['bindListeners'] == "function") {
-            this.elements[b].bindListeners();
-        }
-
-        this.elements[b].parent = this;
-
-        this.elements[b].canvas                  = document.createElement('canvas');
-        this.elements[b].ctx                     = this.elements[b].canvas.getContext('2d');
-
-        this.elements[b].canvas.width            = this.canvas.width;
-        this.elements[b].canvas.height           = this.canvas.height;
-        this.elements[b].canvas.style.position   = 'absolute';      
+        this.elements[b].initialize(this);
         
         if(typeof this.elements[b].elements == "object") {
             this.elements[b].bindSubElements(defaults);
@@ -61,9 +112,14 @@ FiveGUI.GUIRegion.prototype.bindSubElements = function(defaults) {
 }
 
 FiveGUI.GUIRegion.prototype.draw = function() {
-    var ctx = this.ctx;
-    ctx.clearRect (this.getX()-1, this.getY()-1, this.getWidth()+2, this.getHeight()+2);
-    ctx.save();
+    
+    var dCtx = this.drawCtx;
+    
+    if(!this.isMountFilled()) {
+        this.fillMount( this.parent.getContext().getImageData(
+            this.getX(), this.getY(), this.getX()+this.getWidth(), this.getY()+this.getHeight()
+        ));
+    }
     
     if(this.getX() == undefined || this.getY() == "undefined") {
         throw new Error("Position coordinates not set - x:" + this.getX() + ", y:"+this.getY());
@@ -73,36 +129,41 @@ FiveGUI.GUIRegion.prototype.draw = function() {
         throw new Error("Region dimensions not set - width:" + this.getWindth() + ", height:"+this.getHeight());
     }
     
-    var border = this.getBorder();
-    if(typeof border != "undefined") {
-        ctx.strokeStyle = border;
-        ctx.lineWidth = 2;
+    var border = this.getBorderWidth();
+    var lineWidthAmplifier  = 0;
+    
+    if(typeof border != "undefined" && border > 0) {
+        dCtx.strokeStyle = this.getBorderColor();
+        dCtx.lineWidth = border;
+        lineWidthAmplifier  = border/2;
     }
     
-    var background = this.getBackground();
+    var background = this.getBackgroundColor();
     if(typeof background != "undefined") {
-        ctx.fillStyle = background;
+        dCtx.fillStyle = background;
     }    
     
-    ctx.beginPath();
-    ctx.moveTo(this.getX(), this.getY());
-    ctx.lineTo(this.getX()+this.getWidth(), this.getY());
-    ctx.lineTo(this.getX()+this.getWidth(), this.getY()+this.getHeight());
-    ctx.lineTo(this.getX(), this.getY()+this.getHeight());
-    ctx.lineTo(this.getX(), this.getY()-1);
+    dCtx.beginPath();
+    dCtx.moveTo(lineWidthAmplifier, lineWidthAmplifier);
+    dCtx.lineTo(this.getWidth()-lineWidthAmplifier, lineWidthAmplifier);
+    dCtx.lineTo(this.getWidth()-lineWidthAmplifier, this.getHeight()-lineWidthAmplifier);
+    dCtx.lineTo(lineWidthAmplifier, this.getHeight()-lineWidthAmplifier);
+    dCtx.lineTo(lineWidthAmplifier, lineWidthAmplifier);
+    dCtx.closePath();
     
-    if(typeof border != "undefined") {
-        ctx.stroke();
+    if(typeof border != "undefined" && border > 0) {
+        dCtx.stroke();
     }
     
     if(typeof background != "undefined") {
-        ctx.fill();
+        dCtx.fill();
     }
     
-    ctx.restore();
-    this.getContext().drawImage(this.canvas, 0, 0, this.canvas.width, this.canvas.height);    
+    dCtx.restore();
     
     for(a in this.elements) {
-        this.elements[a].draw();
+        dCtx.drawImage(this.elements[a].draw(), this.elements[a].getX(), this.elements[a].getY());
     }
+    
+    return this.drawCanvas;
 }

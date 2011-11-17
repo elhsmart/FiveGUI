@@ -5,5 +5,9 @@ FiveGUI.GUILib = {
         child.prototype = new F();
         child.prototype.constructor = child;
         child.superclass = parent.prototype;          
-    }
+    },
+    
+    capitalize: function(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }    
 }
