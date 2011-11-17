@@ -40,6 +40,14 @@ FiveGUI.GUIRegion.prototype.getContext = function() {
     return this.drawCtx;
 }
 
+FiveGUI.GUIRegion.prototype.getEventX = function() {
+    return this.getX() + this.parent.getEventX();
+}
+
+FiveGUI.GUIRegion.prototype.getEventY = function() {
+    return this.getY() + this.parent.getEventY();
+}
+
 //SETTERS
 
 //PROPERTIES
@@ -161,6 +169,7 @@ FiveGUI.GUIRegion.prototype.draw = function() {
     
     dCtx.restore();
     
+    var a = null;
     for(a in this.elements) {
         dCtx.drawImage(this.elements[a].draw(), this.elements[a].getX(), this.elements[a].getY());
     }

@@ -225,20 +225,20 @@ FiveGUI.GUIButton.prototype.draw = function() {
     eCtx.save();
     eCtx.beginPath();
     eCtx.moveTo(
-        this.getX() + this.parent.getX(), 
-        this.getY() + this.parent.getY()
+        this.getX() + this.parent.getEventX(), 
+        this.getY() + this.parent.getEventY()
     );
     eCtx.lineTo(
-        this.getX() + this.getWidth() + this.parent.getX(), 
-        this.getY() + this.parent.getY()
+        this.getX() + this.getWidth() + this.parent.getEventX(), 
+        this.getY() + this.parent.getEventY()
     );
     eCtx.lineTo(
-        this.getX() + this.getWidth() + this.parent.getX(), 
-        this.getY() + this.getHeight() + this.parent.getY()
+        this.getX() + this.getWidth() + this.parent.getEventX(), 
+        this.getY() + this.getHeight() + this.parent.getEventY()
     );
     eCtx.lineTo(
-        this.getX() + this.parent.getX(), 
-        this.getY() + this.getHeight()+this.parent.getY()
+        this.getX() + this.parent.getEventX(), 
+        this.getY() + this.getHeight()+this.parent.getEventY()
     );
     eCtx.closePath();
     eCtx.restore();

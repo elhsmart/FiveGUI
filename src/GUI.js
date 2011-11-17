@@ -52,6 +52,15 @@ FiveGUI.GUI.prototype.getY = function() {
     return 0;
 }
 
+FiveGUI.GUI.prototype.getEventX = function() {
+    return 0;
+}
+
+FiveGUI.GUI.prototype.getEventY = function() {
+    return 0;
+}
+
+
 FiveGUI.GUI.prototype.getContext = function() {
     return this.mainCtx;
 }
