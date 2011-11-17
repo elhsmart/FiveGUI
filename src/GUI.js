@@ -237,22 +237,5 @@ FiveGUI.GUI.prototype.drawGUI = function() {
     var a = null;
     for(a in this.elements) {
         this.mainCtx.drawImage(this.elements[a].draw(), this.elements[a].getX(), this.elements[a].getY());
-        
-        if(typeof this.elements[a].pathPoints == "object") {
-            var k = 0;
-            var eCtx = document.getElementById("debugCanvas").getContext("2d");
-            eCtx.strokeStyle     = "#000";
-            eCtx.lineWidth       = 2;
-            
-            eCtx.beginPath();
-            eCtx.moveTo(this.elements[a].pathPoints[0].x, this.elements[a].pathPoints[0].y);
-
-            for(k in this.elements[a].pathPoints) {
-                eCtx.lineTo(this.elements[a].pathPoints[k].x, this.elements[a].pathPoints[k].y);        
-            }
-
-            eCtx.closePath();       
-            eCtx.stroke();
-        }
     }
 }
