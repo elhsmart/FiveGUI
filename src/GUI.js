@@ -12,10 +12,11 @@ FiveGUI.GUI = function(parameters) {
     this.mainCanvas = null;
     this.mainCtx    = null;
     this.elements   = new Array();
+    this.eventCoords= new Array();
     
     this.mousePos   = null;
     this.mouseDown  = false;
-    this.mouseUp    = false;    
+    this.mouseUp    = false;
     
     if(typeof parameters == "object") {
         var a = null;
@@ -59,7 +60,6 @@ FiveGUI.GUI.prototype.getEventX = function() {
 FiveGUI.GUI.prototype.getEventY = function() {
     return 0;
 }
-
 
 FiveGUI.GUI.prototype.getContext = function() {
     return this.mainCtx;
@@ -195,6 +195,23 @@ FiveGUI.GUI.prototype.handleEvent = function(evt){
     }
 };
 
+FiveGUI.GUI.prototype.findElementById = function(id) {
+    var a = null;
+    for(a in this.elements) {
+        if(this.elements[a].id == id) {
+            return this.elements[a];
+        }
+        
+        if(typeof this.elements[a].elements == "object") {
+            var obj = this.elements[a].findElementById(id);
+            if(typeof obj == "object") {
+                return obj;
+            }
+        }
+    }
+    return false;
+}
+
 FiveGUI.GUI.prototype.addElement = function(element) {
     
     var a = null;
@@ -220,5 +237,22 @@ FiveGUI.GUI.prototype.drawGUI = function() {
     var a = null;
     for(a in this.elements) {
         this.mainCtx.drawImage(this.elements[a].draw(), this.elements[a].getX(), this.elements[a].getY());
+        
+        if(typeof this.elements[a].pathPoints == "object") {
+            var k = 0;
+            var eCtx = document.getElementById("debugCanvas").getContext("2d");
+            eCtx.strokeStyle     = "#000";
+            eCtx.lineWidth       = 2;
+            
+            eCtx.beginPath();
+            eCtx.moveTo(this.elements[a].pathPoints[0].x, this.elements[a].pathPoints[0].y);
+
+            for(k in this.elements[a].pathPoints) {
+                eCtx.lineTo(this.elements[a].pathPoints[k].x, this.elements[a].pathPoints[k].y);        
+            }
+
+            eCtx.closePath();       
+            eCtx.stroke();
+        }
     }
 }

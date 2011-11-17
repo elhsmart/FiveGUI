@@ -4,6 +4,8 @@
 
 FiveGUI.GUIButton = function (parameters) {
     
+    this.id = FiveGUI.GUILib.uniq();
+    
     this.defaults = {
         // Font settings
         fontSize: 14,
@@ -148,7 +150,17 @@ FiveGUI.GUIButton.prototype.initialize = function(parent) {
         }
     }
     
+    this.initializePathPoints();
     this.bindListeners();    
+}
+
+FiveGUI.GUIButton.prototype.initializePathPoints = function() {
+    this.pathPoints = new Array (
+        {x:this.getX() + this.parent.getEventX(), y:this.getY() + this.parent.getEventY()},
+        {x:this.getX() + this.getWidth() + this.parent.getEventX(), y:this.getY() + this.parent.getEventY()},
+        {x:this.getX() + this.getWidth() + this.parent.getEventX(), y:this.getY() + this.getHeight() + this.parent.getEventY()},
+        {x:this.getX() + this.parent.getEventX(), y:this.getY() + this.getHeight()+this.parent.getEventY()}
+    );
 }
 
 FiveGUI.GUIButton.prototype.addEventListener = function(type, func){
@@ -204,6 +216,89 @@ FiveGUI.GUIButton.prototype.update = function() {
     }
 }
 
+FiveGUI.GUIButton.prototype.bind = function() {
+    // Path for event binding
+    var t = this.id;
+    
+    for (t = this.id+1; t < FiveGUI.GUILib.uniqId; t++) {
+        this.intersectPaths(this.parent.findElementById(t));
+    }
+    
+    var k = null;
+    eCtx = this.eventCtx;
+    eCtx.save();
+    eCtx.beginPath();
+    eCtx.moveTo(this.pathPoints[0].x, this.pathPoints[0].y);
+    
+    for(k in this.pathPoints) {
+        eCtx.lineTo(this.pathPoints[k].x, this.pathPoints[k].y);        
+    }
+    
+    eCtx.closePath();
+    eCtx.restore();
+}
+
+FiveGUI.GUIButton.prototype.intersectPaths = function(object) {
+    
+    var tPoint = null;
+    var oPoint = null;
+    var iPoints = 0;
+    var intersectPoints = new Array();
+    
+    for(tPoint in this.pathPoints) {
+        var tStart = this.pathPoints[tPoint];
+        if(parseInt(tPoint)+1 == this.pathPoints.length) {
+            tPoint = -1;
+        }
+        var tEnd = this.pathPoints[parseInt(tPoint)+1];
+        
+        intersectPoints.push (tStart);
+        for(oPoint in object.pathPoints) {
+            
+            var oStart = object.pathPoints[oPoint];
+            if(parseInt(oPoint)+1 == object.pathPoints.length) {
+                oPoint = -1;
+            }
+            var oEnd = object.pathPoints[parseInt(oPoint)+1];
+            intersectPoint = FiveGUI.GUILib.intersect(tStart, tEnd, oStart, oEnd);
+            
+            if(intersectPoint) {
+                intersectPoints.push (intersectPoint);
+                iPoints++
+            }
+        }        
+    }
+    
+    var a = null;
+    var k = 0;
+    var kStart = 0;
+    var kEnd = 0;
+    
+    for(a in intersectPoints) {
+        if(typeof intersectPoints[a].i != "undefined") {
+            k = k+1;
+            if(k == 1) {
+                kStart = a;
+            }
+            if(k == 2) {
+                kEnd = a;
+            }
+            continue;
+        }
+    }
+    if(intersectPoints[kStart].x != intersectPoints[kEnd].x &&
+        intersectPoints[kStart].y != intersectPoints[kEnd].y) {
+        intersectPoints.splice(parseInt(kStart)+1, 
+        kEnd-1-kStart, {
+            x:intersectPoints[kEnd].x, 
+            y:intersectPoints[kStart].y
+        });
+    } else {
+        intersectPoints.splice(parseInt(kStart)+1, kEnd-1-kStart);
+    }
+    this.pathPoints = intersectPoints;
+}
+
 FiveGUI.GUIButton.prototype.draw = function() {
     
     if(this.getX() == undefined || this.getY() == "undefined") {
@@ -219,30 +314,7 @@ FiveGUI.GUIButton.prototype.draw = function() {
             this.getX(), this.getY(), this.getX()+this.getWidth(), this.getY()+this.getHeight()
         ));
     }
-    
-    // Path for event binding
-    eCtx = this.eventCtx;
-    eCtx.save();
-    eCtx.beginPath();
-    eCtx.moveTo(
-        this.getX() + this.parent.getEventX(), 
-        this.getY() + this.parent.getEventY()
-    );
-    eCtx.lineTo(
-        this.getX() + this.getWidth() + this.parent.getEventX(), 
-        this.getY() + this.parent.getEventY()
-    );
-    eCtx.lineTo(
-        this.getX() + this.getWidth() + this.parent.getEventX(), 
-        this.getY() + this.getHeight() + this.parent.getEventY()
-    );
-    eCtx.lineTo(
-        this.getX() + this.parent.getEventX(), 
-        this.getY() + this.getHeight()+this.parent.getEventY()
-    );
-    eCtx.closePath();
-    eCtx.restore();
-    
+  
     dCtx = this.drawCtx;
     dCtx.putImageData(this.mount, 0, 0);
 
@@ -290,7 +362,8 @@ FiveGUI.GUIButton.prototype.draw = function() {
         
         dCtx.fillText(caption, this.getWidth()/2, this.getHeight()/2);
     }
-    dCtx.restore();
+    dCtx.restore();    
+    this.bind();
     
     return this.drawCanvas;
 }

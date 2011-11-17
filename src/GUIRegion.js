@@ -3,6 +3,8 @@
 /////////////////////////////////////////
 FiveGUI.GUIRegion = function (parameters) {    
     
+    this.id = FiveGUI.GUILib.uniq();
+    
     this.mousePos = null;
     this.mouseDown = false;
     this.mouseUp = false;
@@ -53,6 +55,32 @@ FiveGUI.GUIRegion.prototype.getEventY = function() {
 //PROPERTIES
 
 //METHODS
+FiveGUI.GUIRegion.prototype.initializePathPoints = function() {
+    this.pathPoints = new Array (
+        {x:this.getX() + this.parent.getEventX(), y:this.getY() + this.parent.getEventY()},
+        {x:this.getX() + this.getWidth() + this.parent.getEventX(), y:this.getY() + this.parent.getEventY()},
+        {x:this.getX() + this.getWidth() + this.parent.getEventX(), y:this.getY() + this.getHeight() + this.parent.getEventY()},
+        {x:this.getX() + this.parent.getEventX(), y:this.getY() + this.getHeight()+this.parent.getEventY()}
+    );
+}
+
+FiveGUI.GUIRegion.prototype.findElementById = function(id) {
+    var a = null;
+    for(a in this.elements) {
+        if(this.elements[a].id == id) {
+            return this.elements[a];
+        }
+        
+        if(typeof this.elements[a].elements == "object") {
+            var obj = this.elements[a].findElementById(id);
+            if(typeof obj == "object") {
+                return obj;
+            }
+        }
+    }
+    return false;
+}
+
 FiveGUI.GUIRegion.prototype.update = function() {
     if(typeof this.parent.drawGUI == "function") {
         this.parent.drawGUI();
@@ -79,6 +107,8 @@ FiveGUI.GUIRegion.prototype.initialize = function(parent) {
             this["set"+FiveGUI.GUILib.capitalize(a)](this.defaults[a]);
         }
     }
+    this.initializePathPoints();
+    
 }
 
 FiveGUI.GUIRegion.prototype.addElement = function(element) {
@@ -100,7 +130,7 @@ FiveGUI.GUIRegion.prototype.handleEvent = function(evt){
 }
 
 FiveGUI.GUIRegion.prototype.bindSubElements = function(defaults) {
-    var a,b = null;
+    var a, b = null;
     for(b in this.elements) {
         for(a in defaults) {
             var methodName = "set"+a.capitalize();
@@ -172,7 +202,23 @@ FiveGUI.GUIRegion.prototype.draw = function() {
     var a = null;
     for(a in this.elements) {
         dCtx.drawImage(this.elements[a].draw(), this.elements[a].getX(), this.elements[a].getY());
+        
+        if(typeof this.elements[a].pathPoints == "object") {
+            var k = 0;
+            var eCtx = document.getElementById("debugCanvas").getContext("2d");
+            eCtx.strokeStyle     = "#000";
+            eCtx.lineWidth       = 2;
+            
+            eCtx.beginPath();
+            eCtx.moveTo(this.elements[a].pathPoints[0].x, this.elements[a].pathPoints[0].y);
+
+            for(k in this.elements[a].pathPoints) {
+                eCtx.lineTo(this.elements[a].pathPoints[k].x, this.elements[a].pathPoints[k].y);        
+            }
+
+            eCtx.closePath();       
+            eCtx.stroke();
+        }        
     }
-    
     return this.drawCanvas;
 }

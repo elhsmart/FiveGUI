@@ -3,6 +3,9 @@
 /////////////////////////////////////////
 
 FiveGUI.GUIElement = function (parameters) {
+    
+    this.id = FiveGUI.GUILib.uniq();
+    
     if(typeof parameters == "object") {
         var a = null;
         for(a in paramenters) {
