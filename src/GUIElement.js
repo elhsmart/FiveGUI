@@ -1,7 +1,7 @@
 /////////////////////////////////////////
 //////////// ELEMENT ////////////////////
 /////////////////////////////////////////
-
+"use strict";
 FiveGUI.GUIElement = function (parameters) {
     
     this.id = FiveGUI.GUILib.uniq();
@@ -199,4 +199,23 @@ FiveGUI.GUIElement.prototype.draw = function() {
 
 FiveGUI.GUIElement.prototype.bindListeners = function() {
     /* DUMMY METHOD */
+}
+
+
+FiveGUI.GUIElement.prototype.bind = function() {
+    // Path for event binding
+    
+    var k = null;
+    eCtx = this.eventCtx;
+    
+    eCtx.save();
+    eCtx.beginPath();
+    eCtx.moveTo(this.pathPoints[0].x, this.pathPoints[0].y);
+    
+    for(k in this.pathPoints) {
+        eCtx.lineTo(this.pathPoints[k].x, this.pathPoints[k].y);        
+    }
+    
+    eCtx.closePath();
+    eCtx.restore();
 }

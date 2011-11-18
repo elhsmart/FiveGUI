@@ -1,6 +1,7 @@
 /////////////////////////////////////////
 //////////// REGION /////////////////////
 /////////////////////////////////////////
+"use strict";
 FiveGUI.GUIRegion = function (parameters) {    
     
     this.id = FiveGUI.GUILib.uniq();
@@ -198,10 +199,12 @@ FiveGUI.GUIRegion.prototype.draw = function() {
     }
     
     dCtx.restore();
+    this.bind();
     
     var a = null;
     for(a in this.elements) {
-        dCtx.drawImage(this.elements[a].draw(), this.elements[a].getX(), this.elements[a].getY());
+        dCtx.drawImage(this.elements[a].draw(), this.elements[a].getX(), this.elements[a].getY()); 
     }
+    
     return this.drawCanvas;
 }

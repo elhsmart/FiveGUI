@@ -1,7 +1,6 @@
 /////////////////////////////////////////
 ////////////// MAIN /////////////////////
 /////////////////////////////////////////
-
 "use strict";
 
 var FiveGUI = FiveGUI = FiveGUI || {};
@@ -117,9 +116,50 @@ FiveGUI.GUI.prototype.handleEvent = function(evt){
         var pos         = this.mousePos;
         var el          = element.eventListeners;
         var a           = null;
+        var k           = null;
 
         if(typeof el != "undefined" && element.isVisible()) {
-            if (pos !== null && element.eventCtx.isPointInPath(pos.x, pos.y)) {
+            if (pos !== null 
+                && element.eventCtx.isPointInPath(pos.x, pos.y)
+                && element instanceof FiveGUI.GUIButton
+                ) {
+                
+                // Overlaping with top elements
+                for(k = element.id+1; k <= FiveGUI.GUILib.uniqId; k++) {                    
+                    var obj = this.findElementById(k);
+                    if(obj.eventCtx.isPointInPath(pos.x, pos.y) ) {
+                        element.mouseOver = false;
+                        if (el.onmouseout !== undefined) {
+                            if(typeof el.onmouseout == "function") {
+                                el.onmouseout(evt, element);
+                            } else if(typeof el.onmouseout == "object"){
+                                for( a in el.onmouseout) {
+                                    el.onmouseout[a](evt, element);                        
+                                }
+                            }
+                        }                        
+                        return false;
+                    }
+                }
+                
+                // Overlaping with Region canvas
+                if(
+                    element.parent instanceof FiveGUI.GUIRegion
+                    && !element.parent.eventCtx.isPointInPath(pos.x, pos.y)
+                ) {
+                    element.mouseOver = false;
+                    if (el.onmouseout !== undefined) {
+                        if(typeof el.onmouseout == "function") {
+                            el.onmouseout(evt, element);
+                        } else if(typeof el.onmouseout == "object"){
+                            for( a in el.onmouseout) {
+                                el.onmouseout[a](evt, element);                        
+                            }
+                        }
+                    }                        
+                    return false;                        
+                }
+                
                 // handle onmousedown	
                 if (this.mouseDown) {
                     this.mouseDown = false;
