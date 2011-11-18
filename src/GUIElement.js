@@ -206,7 +206,7 @@ FiveGUI.GUIElement.prototype.bind = function() {
     // Path for event binding
     
     var k = null;
-    eCtx = this.eventCtx;
+    var eCtx = this.eventCtx;
     
     eCtx.save();
     eCtx.beginPath();

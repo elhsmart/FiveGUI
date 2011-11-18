@@ -144,7 +144,7 @@ FiveGUI.GUIButton.prototype.initialize = function(parent) {
         
     var a = null;
     for(a in this.defaults) {
-        methodName = "get"+FiveGUI.GUILib.capitalize(a);
+        var methodName = "get"+FiveGUI.GUILib.capitalize(a);
         if(typeof this[methodName]() == "undefined") {
             this["set"+FiveGUI.GUILib.capitalize(a)](this.defaults[a]);
         }
@@ -232,7 +232,7 @@ FiveGUI.GUIButton.prototype.draw = function() {
         ));
     }
   
-    dCtx = this.drawCtx;
+    var dCtx = this.drawCtx;
     dCtx.putImageData(this.mount, 0, 0);
 
     // Contour drawing

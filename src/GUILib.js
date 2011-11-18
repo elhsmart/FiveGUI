@@ -17,5 +17,6 @@ FiveGUI.GUILib = {
     uniq: function() {
         FiveGUI.GUILib.uniqId++;
         return FiveGUI.GUILib.uniqId;
-    }
+    },
+
 }
