@@ -1,6 +1,3 @@
-/////////////////////////////////////////
-//////////// BUTTON /////////////////////
-/////////////////////////////////////////
 "use strict";
 FiveGUI.GUIButton = function (parameters) {
     
@@ -152,15 +149,6 @@ FiveGUI.GUIButton.prototype.initialize = function(parent) {
     
     this.initializePathPoints();
     this.bindListeners();    
-}
-
-FiveGUI.GUIButton.prototype.initializePathPoints = function() {
-    this.pathPoints = new Array (
-        {x:this.getX() + this.parent.getEventX(), y:this.getY() + this.parent.getEventY()},
-        {x:this.getX() + this.getWidth() + this.parent.getEventX(), y:this.getY() + this.parent.getEventY()},
-        {x:this.getX() + this.getWidth() + this.parent.getEventX(), y:this.getY() + this.getHeight() + this.parent.getEventY()},
-        {x:this.getX() + this.parent.getEventX(), y:this.getY() + this.getHeight()+this.parent.getEventY()}
-    );
 }
 
 FiveGUI.GUIButton.prototype.addEventListener = function(type, func){

@@ -1,6 +1,3 @@
-/////////////////////////////////////////
-//////////// ELEMENT ////////////////////
-/////////////////////////////////////////
 "use strict";
 FiveGUI.GUIElement = function (parameters) {
     
@@ -194,6 +191,7 @@ FiveGUI.GUIElement.prototype.initialize = function() {
 }
 
 FiveGUI.GUIElement.prototype.draw = function() {
+    
     /* DUMMY METHOD */
 }
 
@@ -201,6 +199,14 @@ FiveGUI.GUIElement.prototype.bindListeners = function() {
     /* DUMMY METHOD */
 }
 
+FiveGUI.GUIElement.prototype.initializePathPoints = function() {
+    this.pathPoints = new Array (
+        {x:this.getX() + this.parent.getEventX(), y:this.getY() + this.parent.getEventY()},
+        {x:this.getX() + this.getWidth() + this.parent.getEventX(), y:this.getY() + this.parent.getEventY()},
+        {x:this.getX() + this.getWidth() + this.parent.getEventX(), y:this.getY() + this.getHeight() + this.parent.getEventY()},
+        {x:this.getX() + this.parent.getEventX(), y:this.getY() + this.getHeight()+this.parent.getEventY()}
+    );
+}
 
 FiveGUI.GUIElement.prototype.bind = function() {
     // Path for event binding

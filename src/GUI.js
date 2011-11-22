@@ -1,8 +1,4 @@
-/////////////////////////////////////////
-////////////// MAIN /////////////////////
-/////////////////////////////////////////
 "use strict";
-
 var FiveGUI = FiveGUI = FiveGUI || {};
 
 FiveGUI.GUI = function(parameters) {
@@ -121,7 +117,11 @@ FiveGUI.GUI.prototype.handleEvent = function(evt){
         if(typeof el != "undefined" && element.isVisible()) {
             if (pos !== null 
                 && element.eventCtx.isPointInPath(pos.x, pos.y)
-                && element instanceof FiveGUI.GUIButton
+                && ( 
+                    element instanceof FiveGUI.GUIButton ||
+                    element instanceof FiveGUI.GUICheckbox || 
+                    element instanceof FiveGUI.GUIRadiobutton 
+                    ) 
                 ) {
                 
                 // Overlaping with top elements

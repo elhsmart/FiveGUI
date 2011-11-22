@@ -1,6 +1,14 @@
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+FiveGUI.GUIOption = function () { 
+    this.id = FiveGUI.GUILib.uniq();
+    
+    return this;
+}
+FiveGUI.GUILib.extend(FiveGUI.GUIOption, FiveGUI.GUIElement);
 
+//GETTERS
 
+//SETTERS
+
+//PROPERTIES
+
+//METHODS

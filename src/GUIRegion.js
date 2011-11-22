@@ -1,6 +1,3 @@
-/////////////////////////////////////////
-//////////// REGION /////////////////////
-/////////////////////////////////////////
 "use strict";
 FiveGUI.GUIRegion = function (parameters) {    
     
@@ -56,14 +53,6 @@ FiveGUI.GUIRegion.prototype.getEventY = function() {
 //PROPERTIES
 
 //METHODS
-FiveGUI.GUIRegion.prototype.initializePathPoints = function() {
-    this.pathPoints = new Array (
-        {x:this.getX() + this.parent.getEventX(), y:this.getY() + this.parent.getEventY()},
-        {x:this.getX() + this.getWidth() + this.parent.getEventX(), y:this.getY() + this.parent.getEventY()},
-        {x:this.getX() + this.getWidth() + this.parent.getEventX(), y:this.getY() + this.getHeight() + this.parent.getEventY()},
-        {x:this.getX() + this.parent.getEventX(), y:this.getY() + this.getHeight()+this.parent.getEventY()}
-    );
-}
 
 FiveGUI.GUIRegion.prototype.findElementById = function(id) {
     var a = null;
@@ -203,7 +192,10 @@ FiveGUI.GUIRegion.prototype.draw = function() {
     
     var a = null;
     for(a in this.elements) {
-        dCtx.drawImage(this.elements[a].draw(), this.elements[a].getX(), this.elements[a].getY()); 
+        var drawData = this.elements[a].draw();
+        if(drawData instanceof HTMLCanvasElement) {
+            dCtx.drawImage(drawData, this.elements[a].getX(), this.elements[a].getY()); 
+        }
     }
     
     return this.drawCanvas;
