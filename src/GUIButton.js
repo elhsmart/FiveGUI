@@ -173,6 +173,7 @@ FiveGUI.GUIButton.prototype.bindListeners = function() {
     });    
     this.addEventListener("mousedown", function(e, obj){
         obj.changeState("clicked");
+        obj.parent.setFocused(this.id);
         obj.update(obj);
     });    
     this.addEventListener("mouseup", function(e, obj){

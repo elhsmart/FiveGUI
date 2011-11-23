@@ -60,29 +60,57 @@ FiveGUI.GUI.prototype.getContext = function() {
     return this.mainCtx;
 }
 
+FiveGUI.GUI.prototype.setFocused = function(id) {
+    if(typeof this.focused != "undefined" &&
+        this.focused != id) {
+        var oldId = this.focused;
+        var element = this.findElementById(oldId);
+        element.isFocused(false);
+        element.update();
+    }
+    this.focused = id;
+}
+
 FiveGUI.GUI.prototype.listen = function(){
     var that = this;
     
     // desktop events
+    window.addEventListener("keydown", function(evt){
+        that.handleKeyboardEvent("keydown", evt);
+    }, false);
+    
+    window.addEventListener("keyup", function(evt){
+        that.handleKeyboardEvent("keyup", evt);
+    }, false);   
+    
+    window.addEventListener("keypress", function(evt){
+        that.handleKeyboardEvent("keypress", evt);
+    }, false);       
+    
     this.mainCanvas.addEventListener("mousedown", function(evt){
         that.mouseDown = true;
-        that.handleEvent(evt);
+        that.handleMouseEvent(evt);
     }, false);
     
     this.mainCanvas.addEventListener("mousemove", function(evt){
         that.mouseUp = false;
         that.mouseDown = false;
-        that.handleEvent(evt);
+        that.handleMouseEvent(evt);
     }, false);
     
     this.mainCanvas.addEventListener("mouseup", function(evt){
         that.mouseUp = true;
         that.mouseDown = false;
-        that.handleEvent(evt);
+        that.handleMouseEvent(evt);
+        
+        if(typeof that.focused != "undefined") {
+            var el = that.findElementById(that.focused);
+            el.focus();
+        }
     }, false);
     
     this.mainCanvas.addEventListener("mouseover", function(evt){
-        that.handleEvent(evt);
+        that.handleMouseEvent(evt);
     }, false);
     
     this.mainCanvas.addEventListener("mouseout", function(evt){
@@ -100,7 +128,56 @@ FiveGUI.GUI.prototype.setMousePosition = function(evt){
     };
 };
 
-FiveGUI.GUI.prototype.handleEvent = function(evt){
+FiveGUI.GUI.prototype.handleKeyboardEvent = function(type, evt) {
+    if (!evt) {
+        evt = window.event;
+    }
+    
+    if(typeof this.focused != "undefined") {
+        var element = this.findElementById(this.focused);
+        if(typeof element != "undefined") {
+            var listeners = element.eventListeners;
+            
+            if(type == "keydown") {
+                if (listeners.onkeydown !== undefined) {
+                    if(typeof listeners.onkeydown == "function") {
+                        listeners.onkeydown(evt, element);
+                    } else if(typeof listeners.onkeydown == "object"){
+                        for( a in listeners.onkeydown) {
+                            listeners.onkeydown[a](evt, element);                        
+                        }
+                    }
+                }
+            }
+            
+            if(type == "keyup") {
+                if (listeners.onkeyup !== undefined) {
+                    if(typeof listeners.onkeyup == "function") {
+                        listeners.onkeyup(evt, element);
+                    } else if(typeof listeners.onkeyup == "object"){
+                        for( a in listeners.onkeyup) {
+                            listeners.onkeyup[a](evt, element);                        
+                        }
+                    }
+                }
+            }      
+            
+            if(type == "keypress") {
+                if (listeners.onkeypress !== undefined) {
+                    if(typeof listeners.onkeypress == "function") {
+                        listeners.onkeypress(evt, element);
+                    } else if(typeof listeners.onkeypress == "object"){
+                        for( a in listeners.onkeypress) {
+                            listeners.onkeypress[a](evt, element);                        
+                        }
+                    }
+                }
+            }              
+        }
+    }
+}
+
+FiveGUI.GUI.prototype.handleMouseEvent = function(evt){
     if (!evt) {
         evt = window.event;
     }
@@ -114,15 +191,16 @@ FiveGUI.GUI.prototype.handleEvent = function(evt){
         var a           = null;
         var k           = null;
 
+        
         if(typeof el != "undefined" && element.isVisible()) {
             if (pos !== null 
                 && element.eventCtx.isPointInPath(pos.x, pos.y)
                 && ( 
                     element instanceof FiveGUI.GUIButton ||
                     element instanceof FiveGUI.GUICheckbox || 
-                    element instanceof FiveGUI.GUIRadiobutton 
-                    ) 
-                ) {
+                    element instanceof FiveGUI.GUIRadiobutton ||
+                    element instanceof FiveGUI.GUITextfield ||
+                    element instanceof FiveGUI.GUIRadiobutton )) {
                 
                 // Overlaping with top elements
                 for(k = element.id+1; k <= FiveGUI.GUILib.uniqId; k++) {                    
@@ -143,10 +221,8 @@ FiveGUI.GUI.prototype.handleEvent = function(evt){
                 }
                 
                 // Overlaping with Region canvas
-                if(
-                    element.parent instanceof FiveGUI.GUIRegion
-                    && !element.parent.eventCtx.isPointInPath(pos.x, pos.y)
-                ) {
+                if(element.parent instanceof FiveGUI.GUIRegion
+                    && !element.parent.eventCtx.isPointInPath(pos.x, pos.y)) {
                     element.mouseOver = false;
                     if (el.onmouseout !== undefined) {
                         if(typeof el.onmouseout == "function") {

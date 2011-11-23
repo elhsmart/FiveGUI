@@ -75,6 +75,8 @@ FiveGUI.GUIRadiobutton.prototype.bindListeners = function() {
         } else {
             obj.isChecked(false);
         }
+        
+        obj.parent.setFocused(this.id);
         obj.update(obj);
     });       
 }

@@ -51,7 +51,9 @@ FiveGUI.GUIRegion.prototype.getEventY = function() {
 //SETTERS
 
 //PROPERTIES
-
+FiveGUI.GUIRegion.prototype.setFocused = function(id) {
+    this.parent.setFocused(id);
+}
 //METHODS
 
 FiveGUI.GUIRegion.prototype.findElementById = function(id) {
@@ -116,7 +118,7 @@ FiveGUI.GUIRegion.prototype.setMousePosition = function(evt){
 };
 
 FiveGUI.GUIRegion.prototype.handleEvent = function(evt){
-   FiveGUI.GUI.prototype.handleEvent.call(this, evt);
+   FiveGUI.GUI.prototype.handleMouseEvent.call(this, evt);
 }
 
 FiveGUI.GUIRegion.prototype.bindSubElements = function(defaults) {
