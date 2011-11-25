@@ -218,7 +218,11 @@ FiveGUI.GUITextfield.prototype.bindListeners = function() {
             case 40: { //BOTTOM
                 obj.setCaretPosition(obj.getText().length);
                 var textWidth = obj.drawCtx.measureText(obj.getText()).width + 4;
-                obj.setTextPosition(textWidth - obj.getWidth());
+                if(textWidth > obj.getWidth()) {
+                    obj.setTextPosition(textWidth - obj.getWidth());
+                } else {
+                    obj.setTextPosition(0);
+                }
                 break;
             }
             
