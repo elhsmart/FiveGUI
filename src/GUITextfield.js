@@ -96,8 +96,8 @@ FiveGUI.GUITextfield.prototype.isFocused = function(isFocused) {
         // Workaround for Chrome for backspace button
         if(!document.getElementById("input_"+this.id)) {
             input = document.createElement("input");
-            //input.style.position = "absolute";
-            //input.style.top = "-1000px";
+            input.style.position = "absolute";
+            input.style.top = "-1000px";
             form = document.createElement("form");
             input.setAttribute("value", this.getText());
             input.setAttribute("id", "input_"+this.id);
@@ -168,13 +168,11 @@ FiveGUI.GUITextfield.prototype.bindListeners = function() {
     this.addEventListener("keydown", function(e, obj){
         switch(e.keyCode) {
             case 38: { //TOP
-                console.log("TOP");     
                 obj.setCaretPosition(0);
                 obj.setTextPosition(0);
                 break;
             }
             case 37: { //LEFT
-                console.log("LEFT");     
                 if(obj.getCaretPosition() > 0) {
                     obj.setCaretPosition(obj.getCaretPosition()-1);
                 }
@@ -195,7 +193,6 @@ FiveGUI.GUITextfield.prototype.bindListeners = function() {
                 break;
             }
             case 39: { //RIGHT
-                console.log("RIGHT");     
                 if(obj.getCaretPosition() < obj.getText().length) {
                     obj.setCaretPosition(obj.getCaretPosition()+1);
                 } else {
@@ -219,7 +216,6 @@ FiveGUI.GUITextfield.prototype.bindListeners = function() {
                 break;
             }
             case 40: { //BOTTOM
-                console.log("BOTTOM");     
                 obj.setCaretPosition(obj.getText().length);
                 var textWidth = obj.drawCtx.measureText(obj.getText()).width + 4;
                 obj.setTextPosition(textWidth - obj.getWidth());
@@ -227,7 +223,6 @@ FiveGUI.GUITextfield.prototype.bindListeners = function() {
             }
             
             case 8: { //BACKSPACE
-                console.log("BACKSPACE");
                 if(obj.getCaretPosition() > 0) {
                     var leftPart = obj.getText().substr(0, obj.getCaretPosition()-1);
                     var rightPart = obj.getText().substr(obj.getCaretPosition(), obj.getText().length - obj.getCaretPosition());
@@ -401,7 +396,8 @@ FiveGUI.GUITextfield.prototype.drawCarret = function() {
         dCtx.beginPath();
         dCtx.moveTo(textWidth, 2);
         dCtx.lineTo(textWidth, this.getHeight()-2);
-        //dCtx.closePath();
+        dCtx.closePath();
+        
         dCtx.fill();
         dCtx.stroke();
     }    

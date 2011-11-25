@@ -3,6 +3,7 @@ var FiveGUI = FiveGUI = FiveGUI || {};
 
 FiveGUI.GUI = function(parameters) {
     
+    this.id         = FiveGUI.GUILib.uniq();
     this.defaults   = { };
     this.mainCanvas = null;
     this.mainCtx    = null;
@@ -186,6 +187,10 @@ FiveGUI.GUI.prototype.handleMouseEvent = function(evt){
     
     for (var n = this.elements.length - 1; n >= 0; n--) {
         var element     = this.elements[n];
+        if(typeof element == "undefined") {
+            break;
+        }
+        
         var pos         = this.mousePos;
         var el          = element.eventListeners;
         var a           = null;
@@ -200,23 +205,28 @@ FiveGUI.GUI.prototype.handleMouseEvent = function(evt){
                     element instanceof FiveGUI.GUICheckbox || 
                     element instanceof FiveGUI.GUIRadiobutton ||
                     element instanceof FiveGUI.GUITextfield ||
-                    element instanceof FiveGUI.GUIRadiobutton )) {
+                    element instanceof FiveGUI.GUIRadiobutton ||
+                    element instanceof FiveGUI.GUIDropdown ||
+                    element instanceof FiveGUI.GUIOption 
+                    )) {
                 
                 // Overlaping with top elements
                 for(k = element.id+1; k <= FiveGUI.GUILib.uniqId; k++) {                    
                     var obj = this.findElementById(k);
-                    if(obj.eventCtx.isPointInPath(pos.x, pos.y) ) {
-                        element.mouseOver = false;
-                        if (el.onmouseout !== undefined) {
-                            if(typeof el.onmouseout == "function") {
-                                el.onmouseout(evt, element);
-                            } else if(typeof el.onmouseout == "object"){
-                                for( a in el.onmouseout) {
-                                    el.onmouseout[a](evt, element);                        
+                    if(obj != false) {
+                        if(obj.eventCtx.isPointInPath(pos.x, pos.y) ) {
+                            element.mouseOver = false;
+                            if (el.onmouseout !== undefined) {
+                                if(typeof el.onmouseout == "function") {
+                                    el.onmouseout(evt, element);
+                                } else if(typeof el.onmouseout == "object"){
+                                    for( a in el.onmouseout) {
+                                        el.onmouseout[a](evt, element);                        
+                                    }
                                 }
-                            }
-                        }                        
-                        return false;
+                            }                        
+                            return false;
+                        }
                     }
                 }
                 
