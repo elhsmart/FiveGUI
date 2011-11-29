@@ -207,7 +207,10 @@ FiveGUI.GUI.prototype.handleMouseEvent = function(evt){
                     element instanceof FiveGUI.GUITextfield ||
                     element instanceof FiveGUI.GUIRadiobutton ||
                     element instanceof FiveGUI.GUIDropdown ||
-                    element instanceof FiveGUI.GUIOption 
+                    element instanceof FiveGUI.GUIOption || 
+                    element instanceof FiveGUI.GUITextarea ||
+                    element instanceof FiveGUI.GUIProgressbar ||
+                    element instanceof FiveGUI.GUISlider 
                     )) {
                 
                 // Overlaping with top elements
