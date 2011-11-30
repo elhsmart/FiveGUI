@@ -133,8 +133,8 @@ FiveGUI.GUITextarea.prototype.isFocused = function(isFocused) {
             input.style.fontSize = "14px";
             input.style.fontFamily = "Arial";
             
-            //input.style.position = "absolute";
-            //input.style.top = "-1000px";
+            input.style.position = "absolute";
+            input.style.top = "-1000px";
             
             input.setAttribute("value", this.getText());
             input.setAttribute("id", "input_"+this.id);

@@ -210,16 +210,17 @@ FiveGUI.GUIElement.prototype.initializePathPoints = function() {
 
 FiveGUI.GUIElement.prototype.bind = function() {
     // Path for event binding
-    
     var k = null;
     var eCtx = this.eventCtx;
     
     eCtx.save();
+    eCtx.clearRect(0,0,eCtx.canvas.width, eCtx.canvas.height);
+    
     eCtx.beginPath();
     eCtx.moveTo(this.pathPoints[0].x, this.pathPoints[0].y);
     
     for(k in this.pathPoints) {
-        eCtx.lineTo(this.pathPoints[k].x, this.pathPoints[k].y);        
+        eCtx.lineTo(this.pathPoints[k].x, this.pathPoints[k].y);
     }
     
     eCtx.closePath();
