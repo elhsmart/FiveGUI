@@ -173,7 +173,14 @@ FiveGUI.GUISlider.prototype.addEventListener = function(type, func){
 
 FiveGUI.GUISlider.prototype.bindListeners = function() {
     this.addEventListener("mouseover", function(e, obj){
-        obj.changeState("hovered");
+        if(e.pageX >= obj.parent.getEventX() + obj.getX() + obj.getHeight()/2
+        && e.pageX <=  obj.parent.getEventX() + obj.getX() + obj.getHeight()/2 + obj.effectiveWidth) {
+            obj.changeState("hovered");
+        } else {
+            obj.changeState("normal");            
+            obj.initializePathPoints();
+            obj.bind();             
+        }
         obj.update(obj);
     });
     this.addEventListener("mouseout", function(e, obj){
@@ -190,18 +197,16 @@ FiveGUI.GUISlider.prototype.bindListeners = function() {
             && e.pageX <=  obj.parent.getEventX() + obj.getX() + obj.getHeight()/2 + obj.effectiveWidth) {
                 var delta = e.pageX - (obj.parent.getEventX() + obj.getX() + obj.getHeight()/2);
                 obj.caretPosition = delta;
-                obj.initializePathPoints();
-                obj.bind();
             } else if(e.pageX > obj.parent.getEventX() + obj.getX() + obj.getHeight()/2 + obj.effectiveWidth) {
-                obj.caretPosition = obj.effectiveWidth;
-                obj.initializePathPoints();
-                obj.bind();                
+                obj.caretPosition = obj.effectiveWidth;         
             } else if(e.pageX < obj.parent.getEventX() + obj.getX() + obj.getHeight()/2) {
-                obj.caretPosition = 0;
-                obj.initializePathPoints();
-                obj.bind();                 
+                obj.caretPosition = 0;             
             }
         }
+        
+        obj.initializePathPoints();
+        obj.bind();     
+        
         obj.update(obj);
     });  
     this.addEventListener("mouseup", function(e, obj){

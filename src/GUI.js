@@ -37,7 +37,7 @@ FiveGUI.GUI = function(parameters) {
         throw new Error("Please provide valid HTMLCanvasElement for GUI");
     }
     
-    this.mainCtx = this.mainCanvas.getContext("2d");
+    this.mainCtx = this.mainCanvas.getContext("2d");    
     this.listen();
 }
 
@@ -216,7 +216,7 @@ FiveGUI.GUI.prototype.handleMouseEvent = function(evt){
                 // Overlaping with top elements
                 for(k = element.id+1; k <= FiveGUI.GUILib.uniqId; k++) {                    
                     var obj = this.findElementById(k);
-                    if(obj != false) {
+                    if(obj != false && !(element instanceof FiveGUI.GUIOption)) {
                         if(obj.eventCtx.isPointInPath(pos.x, pos.y) ) {
                             element.mouseOver = false;
                             if (el.onmouseout !== undefined) {

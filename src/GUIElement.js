@@ -225,4 +225,20 @@ FiveGUI.GUIElement.prototype.bind = function() {
     
     eCtx.closePath();
     eCtx.restore();
+    
+    var dCtx = document.getElementById("testCanvas").getContext("2d");
+    
+    dCtx.save();
+    //dCtx.clearRect(0,0,dCtx.canvas.width, dCtx.canvas.height);
+    
+    dCtx.beginPath();
+    dCtx.moveTo(this.pathPoints[0].x, this.pathPoints[0].y);
+    
+    for(k in this.pathPoints) {
+        dCtx.lineTo(this.pathPoints[k].x, this.pathPoints[k].y);
+    }
+    
+    dCtx.closePath();
+    dCtx.stroke();
+    dCtx.restore();    
 }
