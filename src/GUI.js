@@ -368,3 +368,47 @@ FiveGUI.GUI.prototype.drawGUI = function() {
         this.mainCtx.drawImage(this.elements[a].draw(), this.elements[a].getX(), this.elements[a].getY());
     }
 }
+
+FiveGUI.GUI.prototype.optionClick = function(obj) {
+    var selectedOption = null;
+    var GUI = this;
+    
+    for(a in this.elements) {
+        if(this.elements[a] instanceof FiveGUI.GUIOption) {
+            this.elements[a].isVisible(false);
+            this.elements[a].update(a);
+        }
+
+        if(obj.id == this.elements[a].id) {
+            selectedOption = a;
+        }
+    }
+
+    var Dropdown = this.findElementById(obj.parentId);
+
+    if(Dropdown && Dropdown instanceof FiveGUI.GUIDropdown) {
+
+        for(a in Dropdown.elements) {
+            if(Dropdown.elements[a].id == obj.id) {
+                Dropdown.setSelectedOption(a);
+            }
+        }
+
+        Dropdown
+            .isClicked(false);
+        Dropdown    
+            .update();
+
+        for(a in Dropdown.elements) {
+            Dropdown.elements[a].isVisible(false);
+        }
+
+        var k = 0;
+        for(k = 0; k < this.elements.length; k++) {
+            if(this.elements[k] instanceof FiveGUI.GUIOption) {
+                this.elements.splice(k, 1);
+                k--;
+            }
+        }
+    }    
+}

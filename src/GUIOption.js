@@ -27,6 +27,7 @@ FiveGUI.GUIOption = function (parameters) {
     this.width = 0;
     this.height = 0;
     this.parentId = 0;
+    this.selected = false;
     
     if(typeof parameters == "object") {
         var a = null;
@@ -57,6 +58,15 @@ FiveGUI.GUIOption.prototype.getHoverBorderColor = function() {
 FiveGUI.GUIOption.prototype.getTextHoverColor = function() {
     return this.textHoverColor;
 }
+
+FiveGUI.GUIOption.prototype.getClickBackgroundColor = function() {
+    return this.clickBackgroundColor;
+}
+
+FiveGUI.GUIOption.prototype.getClickBorderColor = function() {
+    return this.clickBorderColor;
+}
+
 FiveGUI.GUIOption.prototype.getState = function() {
     if(this.state == undefined) {
         this.state = "normal";
@@ -87,10 +97,84 @@ FiveGUI.GUIOption.prototype.setHoverBorderColor = function(hb) {
     return this;
 }
 
+FiveGUI.GUIOption.prototype.setTextClickColor = function(tcc) {
+    this.textClickColor = tcc;
+    return this;
+}
+
+FiveGUI.GUIOption.prototype.setClickBackgroundColor = function(cbc) {
+    this.clickBackgroundColor = cbc;
+    return this;
+}
+
+FiveGUI.GUIOption.prototype.setClickBorderColor = function(cb) {
+    this.clickBorderColor = cb;
+    return this;
+}
+
 //PROPERTIES
+FiveGUI.GUIOption.prototype.isSelected = function(isSelected) {
+    if(typeof this.selected == "undefined") {
+        this.selected = false;
+    }
+    
+    if(typeof isSelected != "undefined") {
+        switch(isSelected) {
+            case true:
+            case false: {
+                this.selected = isSelected;
+                break;
+            }
+            default: {
+                this.selected = false;
+            }
+        }
+    }
+    return this.selected;
+}
+
+FiveGUI.GUIOption.prototype.getBorderColor = function() {
+    if(typeof this['getState'] != "function") {
+        return this.borderColor;
+    } else {
+        switch(this['getState']()) {
+            case "clicked":{
+                return this.getClickBorderColor();
+            }
+            case "selected":
+            case "hovered":{
+                return this.getHoverBorderColor();
+            }
+            case "normal":
+            default: {
+                return this.borderColor;
+            }
+        }
+    }    
+}
+
+FiveGUI.GUIOption.prototype.getBackgroundColor = function() {
+    if(typeof this['getState'] != "function") {
+        return this.backgroundColor;
+    } else {
+        switch(this['getState']()) {
+            case "clicked":{
+                return this.getClickBackgroundColor();
+            }
+            case "selected":
+            case "hovered":{
+                return this.getHoverBackgroundColor();
+            }
+            case "normal":
+            default: {
+                return this.backgroundColor;
+            }
+        }
+    }    
+}
 
 //METHODS
-FiveGUI.GUIOption.prototype.update = function() {
+FiveGUI.GUIOption.prototype.update = function(obj) {
     if(this.parent.drawCanvas) {
         this.parent.update();
     } else {
@@ -100,12 +184,20 @@ FiveGUI.GUIOption.prototype.update = function() {
 
 FiveGUI.GUIOption.prototype.changeState = function(state) {
     switch(state) {
+        case "clicked":
         case "hovered":
-        case "normal": {
-            this.state = state;break;
+        case "selected":{
+            this.state = state;
+            break;
         }
+        
+        case "normal":        
         default: {
-            this.state = "normal";
+            if(this.isSelected()) {
+                this.state = "selected";
+            } else {
+                this.state = "normal";
+            }
         }
     }
     
@@ -128,56 +220,24 @@ FiveGUI.GUIOption.prototype.bindListeners = function() {
         obj.changeState("hovered");
         obj.update(obj);
     });
+    this.addEventListener("mouseup", function(e, obj){
+        obj.changeState("hovered");
+        obj.update(obj);
+    });    
     this.addEventListener("mouseout", function(e, obj){
         obj.changeState("normal");
         obj.update(obj);
     });    
     this.addEventListener("mousedown", function(e, obj){
         obj.changeState("clicked");
-        var selectedOption = null;
-        var GUI = obj.parent;
-
-        for(a in obj.parent.elements) {
-            if(obj.parent.elements[a] instanceof FiveGUI.GUIOption) {
-                obj.parent.elements[a].isVisible(false);
-                obj.parent.elements[a].update(a);
-            }
-            
-            if(obj.id == obj.parent.elements[a].id) {
-                selectedOption = a;
-            }
-        }
-        
-        var Dropdown = obj.parent.findElementById(obj.parentId);
-        if(Dropdown) {
-            
-            for(a in Dropdown.elements) {
-                if(Dropdown.elements[a].id == obj.id) {
-                    Dropdown.setSelectedOption(a);
-                }
-            }
-            
-            Dropdown
-                .isClicked(false);
-            Dropdown    
-                .update();
-                
-            for(a in Dropdown.elements) {
-                Dropdown.elements[a].isVisible(false);
-            }
-            
-            var k = 0;
-            for(k = 0; k < obj.parent.elements.length; k++) {
-                if(obj.parent.elements[k] instanceof FiveGUI.GUIOption) {
-                    obj.parent.elements.splice(k, 1);
-                    k--;
-                }
-            }
-        }
+        obj.parent.optionClick(obj);
     });    
 }
 
-FiveGUI.GUIOption.prototype.initialize = function(parent) {    
+FiveGUI.GUIOption.prototype.initialize = function(parent, pathPointsInitialize) {    
+    if(typeof pathPointsInitialize == "undefined") {
+        pathPointsInitialize = false;
+    }
     this.parent = parent;
     
     if(this.getWidth() == 0 || this.getHeight() == 0) {
@@ -194,6 +254,10 @@ FiveGUI.GUIOption.prototype.initialize = function(parent) {
         if(typeof this[methodName]() == "undefined") {
             this["set"+FiveGUI.GUILib.capitalize(a)](this.defaults[a]);
         }
+    }
+    
+    if(pathPointsInitialize) {
+        this.initializePathPoints();
     }
     
     this.bindListeners();
