@@ -216,7 +216,10 @@ FiveGUI.GUI.prototype.handleMouseEvent = function(evt){
                 // Overlaping with top elements
                 for(k = element.id+1; k <= FiveGUI.GUILib.uniqId; k++) {                    
                     var obj = this.findElementById(k);
-                    if(obj != false && !(element instanceof FiveGUI.GUIOption)) {
+                    // Check of instancing added in case of overlaping dropdowned options of 
+                    if(obj != false && 
+                        !(element instanceof FiveGUI.GUIOption 
+                            && this.findElementById(element.parentId) instanceof FiveGUI.GUIDropdown)) {
                         if(obj.eventCtx.isPointInPath(pos.x, pos.y) ) {
                             element.mouseOver = false;
                             if (el.onmouseout !== undefined) {
