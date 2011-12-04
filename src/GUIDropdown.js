@@ -65,6 +65,10 @@ FiveGUI.GUIDropdown.prototype.getHoverBackgroundColor = function() {
     return this.hoverBackgroundColor;
 }
 
+FiveGUI.GUIDropdown.prototype.getHoverBackgroundImage = function() {
+    return this.hoverBackgroundImage;
+}
+
 FiveGUI.GUIDropdown.prototype.getClickBackgroundColor = function() {
     return this.clickBackgroundColor;
 }
@@ -105,6 +109,11 @@ FiveGUI.GUIDropdown.prototype.setTextHoverColor = function(thc) {
 
 FiveGUI.GUIDropdown.prototype.setHoverBackgroundColor = function(hbc) {
     this.hoverBackgroundColor = hbc;
+    return this;
+}
+
+FiveGUI.GUIDropdown.prototype.setHoverBackgroundImage = function(hbi) {
+    this.hoverBackgroundImage = hbi;
     return this;
 }
 
@@ -150,6 +159,7 @@ FiveGUI.GUIDropdown.prototype.isClicked = function(isClicked) {
 }
 
 //METHODS
+
 FiveGUI.GUIDropdown.prototype.addElement = function(element) {
     element.parentId = this.id;
     this.elements.push(element);
@@ -217,9 +227,10 @@ FiveGUI.GUIDropdown.prototype.bindListeners = function() {
         obj.update(obj);
     });    
     this.addEventListener("mousedown", function(e, obj){
-        if(obj.isClicked()) {
-            obj.isClicked(false);
-        } else {
+        if(!obj.isClicked()) {
+        // Do not touch dropdown while select boxes listed
+        //    obj.isClicked(false);
+        //} else {
             obj.isClicked(true);
         }
         obj.update(obj);
@@ -277,6 +288,59 @@ FiveGUI.GUIDropdown.prototype.draw = function() {
     dCtx.putImageData(this.mount, 0, 0);
 
     // Contour drawing
+    
+    if(this.getBackgroundImage() instanceof Image) {
+        this.drawBackgroundImage();
+    } else {
+        this.drawContour();
+    }   
+    
+    if(this.isClicked()) {
+        var GUI = this.parent;
+        while(!(GUI instanceof FiveGUI.GUI)) {
+            GUI = GUI.parent;
+        }
+        
+        var optionX = this.getX()+this.parent.getEventX();
+        var optionY = this.getY() + this.getHeight()+this.parent.getEventY();
+        
+        for(a in this.elements) {
+            if(this.elements[a].isVisible() == false) {
+                this.elements[a]
+                    .setX(optionX)
+                    .setY(optionY)
+                    .isVisible(true);
+                    
+                GUI.addElement(this.elements[a]);
+            }
+            this.elements[a].initializePathPoints();                   
+            optionY = this.elements[a].getHeight() + optionY;
+        }
+    } else {
+        if(typeof this.elements[this.getSelectedOption()] != "undefined") {
+            var caption = this.elements[this.getSelectedOption()].getCaption();
+            var color           = this.getFontColor();        
+            var font            = this.getFontName();        
+            var size            = this.getFontSize();
+
+            dCtx.fillStyle      = color;
+            dCtx.font           = size+"px "+font;
+            dCtx.textAlign      = "left";
+            dCtx.textBaseline   = "middle";
+
+            dCtx.fillText(caption, 0, this.getHeight()/2);
+        }    
+    }
+    
+    dCtx.restore();    
+    this.bind();
+    
+    return this.drawCanvas;
+}
+
+FiveGUI.GUIDropdown.prototype.drawContour = function() {
+    var dCtx = this.drawCtx;
+    
     var border = this.getBorderWidth();
     var lineWidthAmplifier = 0;
         
@@ -323,47 +387,10 @@ FiveGUI.GUIDropdown.prototype.draw = function() {
     dCtx.lineTo(iconStart+(segment*3), Math.floor(segment)+0.5);
     dCtx.lineTo(iconStart+(segment*2), segment*3);
     dCtx.closePath();
-    dCtx.stroke();
-    
-    if(this.isClicked()) {
-        var GUI = this.parent;
-        while(!(GUI instanceof FiveGUI.GUI)) {
-            GUI = GUI.parent;
-        }
-        
-        var optionX = this.getX()+this.parent.getEventX();
-        var optionY = this.getY() + this.getHeight()+this.parent.getEventY();
-        
-        for(a in this.elements) {
-            if(this.elements[a].isVisible() == false) {
-                this.elements[a]
-                    .setX(optionX)
-                    .setY(optionY)
-                    .isVisible(true);
-                    
-                GUI.addElement(this.elements[a]);
-            }
-            this.elements[a].initializePathPoints();                   
-            optionY = this.elements[a].getHeight() + optionY;
-        }
-    } else {
-        if(typeof this.elements[this.getSelectedOption()] != "undefined") {
-            var caption = this.elements[this.getSelectedOption()].getCaption();
-            var color           = this.getFontColor();        
-            var font            = this.getFontName();        
-            var size            = this.getFontSize();
+    dCtx.stroke();    
+}
 
-            dCtx.fillStyle      = color;
-            dCtx.font           = size+"px "+font;
-            dCtx.textAlign      = "left";
-            dCtx.textBaseline   = "middle";
-
-            dCtx.fillText(caption, 0, this.getHeight()/2);
-        }    
-    }
-    
-    dCtx.restore();    
-    this.bind();
-    
-    return this.drawCanvas;
+FiveGUI.GUIDropdown.prototype.drawBackgroundImage = function() {
+    var dCtx = this.drawCtx;
+    dCtx.drawImage(this.getBackgroundImage(), 0, 0);
 }

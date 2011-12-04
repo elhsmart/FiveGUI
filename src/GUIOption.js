@@ -58,15 +58,18 @@ FiveGUI.GUIOption.prototype.getHoverBorderColor = function() {
 FiveGUI.GUIOption.prototype.getTextHoverColor = function() {
     return this.textHoverColor;
 }
-
 FiveGUI.GUIOption.prototype.getClickBackgroundColor = function() {
     return this.clickBackgroundColor;
 }
-
 FiveGUI.GUIOption.prototype.getClickBorderColor = function() {
     return this.clickBorderColor;
 }
-
+FiveGUI.GUIOption.prototype.getHoverBackgroundImage = function() {
+    return this.hoverBackgroundImage;
+}
+FiveGUI.GUIOption.prototype.getClickBackgroundImage = function() {
+    return this.clickBackgroundImage;
+}
 FiveGUI.GUIOption.prototype.getState = function() {
     if(this.state == undefined) {
         this.state = "normal";
@@ -96,19 +99,24 @@ FiveGUI.GUIOption.prototype.setHoverBorderColor = function(hb) {
     this.hoverBorderColor = hb;
     return this;
 }
-
 FiveGUI.GUIOption.prototype.setTextClickColor = function(tcc) {
     this.textClickColor = tcc;
     return this;
 }
-
 FiveGUI.GUIOption.prototype.setClickBackgroundColor = function(cbc) {
     this.clickBackgroundColor = cbc;
     return this;
 }
-
 FiveGUI.GUIOption.prototype.setClickBorderColor = function(cb) {
     this.clickBorderColor = cb;
+    return this;
+}
+FiveGUI.GUIOption.prototype.setHoverBackgroundImage = function(hbi) {
+    this.hoverBackgroundImage = hbi;
+    return this;
+}
+FiveGUI.GUIOption.prototype.setClickBackgroundImage = function(cbi) {
+    this.clickBackgroundImage = cbi;
     return this;
 }
 
@@ -174,6 +182,25 @@ FiveGUI.GUIOption.prototype.getBackgroundColor = function() {
 }
 
 //METHODS
+FiveGUI.GUIOption.prototype.getBackgroundImage = function() {
+    if(typeof this['getState'] != "function") {
+        return this.backgroundImage;
+    } else {
+        switch(this['getState']()) {
+            case "clicked":{
+                return this.getClickBackgroundImage();
+            }
+            case "selected":
+            case "hovered":{
+                return this.getHoverBackgroundImage();
+            }
+            case "normal":
+            default: {
+                return this.backgroundImage;
+            }
+        }
+    }    
+}
 FiveGUI.GUIOption.prototype.update = function(obj) {
     if(this.parent.drawCanvas) {
         this.parent.update();
@@ -285,6 +312,41 @@ FiveGUI.GUIOption.prototype.draw = function() {
         return this.drawCanvas;
     }
     
+    if(this.getBackgroundImage() instanceof Image) {
+        this.drawBackgroundImage();
+    } else {
+        this.drawContour();
+    }   
+    
+    // Inner Text
+    var caption = this.getCaption();
+    if(caption != undefined) {
+        var color           = this.getFontColor();        
+        var font            = this.getFontName();        
+        var size            = this.getFontSize();
+        
+        dCtx.fillStyle      = color;
+        dCtx.font           = size+"px "+font;
+        dCtx.textAlign      = "left";
+        dCtx.textBaseline   = "middle";
+        
+        dCtx.fillText(caption, 0, this.getHeight()/2);
+    }
+    dCtx.restore();    
+    this.bind();
+    
+    return this.drawCanvas;
+}
+
+FiveGUI.GUIOption.prototype.drawBackgroundImage = function() {
+    var dCtx = this.drawCtx;
+    
+    dCtx.drawImage(this.getBackgroundImage(), 0, 0);
+}
+
+FiveGUI.GUIOption.prototype.drawContour = function() {
+    var dCtx = this.drawCtx;
+    
     // Contour drawing
     var border = this.getBorderWidth();
     var lineWidthAmplifier = 0;
@@ -313,24 +375,5 @@ FiveGUI.GUIOption.prototype.draw = function() {
     if(typeof background != "undefined") {
         dCtx.fillStyle = background;
         dCtx.fill();
-    }
-    
-    // Inner Text
-    var caption = this.getCaption();
-    if(caption != undefined) {
-        var color           = this.getFontColor();        
-        var font            = this.getFontName();        
-        var size            = this.getFontSize();
-        
-        dCtx.fillStyle      = color;
-        dCtx.font           = size+"px "+font;
-        dCtx.textAlign      = "left";
-        dCtx.textBaseline   = "middle";
-        
-        dCtx.fillText(caption, 0, this.getHeight()/2);
-    }
-    dCtx.restore();    
-    this.bind();
-    
-    return this.drawCanvas;
+    }    
 }

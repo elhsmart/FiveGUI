@@ -200,24 +200,15 @@ FiveGUI.GUI.prototype.handleMouseEvent = function(evt){
         if(typeof el != "undefined" && element.isVisible()) {
             if (pos !== null 
                 && element.eventCtx.isPointInPath(pos.x, pos.y)
-                && ( 
-                    element instanceof FiveGUI.GUIButton ||
-                    element instanceof FiveGUI.GUICheckbox || 
-                    element instanceof FiveGUI.GUIRadiobutton ||
-                    element instanceof FiveGUI.GUITextfield ||
-                    element instanceof FiveGUI.GUIRadiobutton ||
-                    element instanceof FiveGUI.GUIDropdown ||
-                    element instanceof FiveGUI.GUIOption || 
-                    element instanceof FiveGUI.GUITextarea ||
-                    element instanceof FiveGUI.GUIProgressbar ||
-                    element instanceof FiveGUI.GUISlider 
+                && !( element instanceof FiveGUI.GUIRegion ||
+                        element instanceof FiveGUI.GUILabel
                     )) {
                 
                 // Overlaping with top elements
                 for(k = element.id+1; k <= FiveGUI.GUILib.uniqId; k++) {                    
                     var obj = this.findElementById(k);
-                    // Check of instancing added in case of overlaping dropdowned options of 
                     if(obj != false && 
+                        // Check of instancing added in case of overlaping dropdowned options over all elements.
                         !(element instanceof FiveGUI.GUIOption 
                             && this.findElementById(element.parentId) instanceof FiveGUI.GUIDropdown)) {
                         if(obj.eventCtx.isPointInPath(pos.x, pos.y) ) {
@@ -350,7 +341,10 @@ FiveGUI.GUI.prototype.addElement = function(element) {
     for(a in this.defaults) {
         var methodName = "set"+FiveGUI.GUILib.capitalize(a);
         if(typeof element[methodName] == "function") {
-            if(element["get"+FiveGUI.GUILib.capitalize(a)]() == undefined) {
+            if(
+                element["get"+FiveGUI.GUILib.capitalize(a)]() == undefined &&
+                typeof element["get"+FiveGUI.GUILib.capitalize(a)]() == "undefined"
+                ) {
                 element[methodName](this.defaults[a]);
             }
         }

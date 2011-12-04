@@ -47,26 +47,34 @@ FiveGUI.GUISlider.prototype.getCaretPosition = function() {
 FiveGUI.GUISlider.prototype.getHoverBackgroundColor = function() {
     return this.hoverBackgroundColor;
 }
-
 FiveGUI.GUISlider.prototype.getClickBackgroundColor = function() {
     return this.clickBackgroundColor;
 }
-
 FiveGUI.GUISlider.prototype.getHoverBorderColor = function() {
     return this.hoverBorderColor;
 }
-
 FiveGUI.GUISlider.prototype.getClickBorderColor = function() {
     return this.clickBorderColor;
 }
-
 FiveGUI.GUISlider.prototype.getTextHoverColor = function() {
     return this.textHoverColor;
 }
-
 FiveGUI.GUISlider.prototype.getTextClickColor = function() {
     return this.textClickColor;
 }
+FiveGUI.GUISlider.prototype.getBasisImage = function() {
+    return this.basisImage;
+}
+FiveGUI.GUISlider.prototype.getHoverCaretImage = function() {
+    return this.hoverCaretImage;
+}
+FiveGUI.GUISlider.prototype.getClickCaretImage = function() {
+    return this.clickCaretImage;
+}
+FiveGUI.GUISlider.prototype.getCaretImage = function() {
+    return this.caretImage;
+}
+
 
 //SETTERS
 FiveGUI.GUISlider.prototype.setCaretPosition = function(pos) {
@@ -77,31 +85,43 @@ FiveGUI.GUISlider.prototype.setTextHoverColor = function(thc) {
     this.textHoverColor = thc;
     return this;
 }
-
 FiveGUI.GUISlider.prototype.setTextClickColor = function(tcc) {
     this.textClickColor = tcc;
     return this;
 }
-
 FiveGUI.GUISlider.prototype.setHoverBackgroundColor = function(hbc) {
     this.hoverBackgroundColor = hbc;
     return this;
 }
-
 FiveGUI.GUISlider.prototype.setClickBackgroundColor = function(cbc) {
     this.clickBackgroundColor = cbc;
     return this;
 }
-
 FiveGUI.GUISlider.prototype.setHoverBorderColor = function(hb) {
     this.hoverBorderColor = hb;
     return this;
 }
-
 FiveGUI.GUISlider.prototype.setClickBorderColor = function(cb) {
     this.clickBorderColor = cb;
     return this;
 }
+FiveGUI.GUISlider.prototype.setBasisImage = function(bi) {
+    this.basisImage = bi;
+    return this;
+}
+FiveGUI.GUISlider.prototype.setHoverCaretImage = function(hci) {
+    this.hoverCaretImage = hci;
+    return this;
+}
+FiveGUI.GUISlider.prototype.setClickCaretImage = function(cci) {
+    this.clickCaretImage = cci;
+    return this;
+}
+FiveGUI.GUISlider.prototype.setCaretImage = function(ci) {
+    this.caretImage = ci;
+    return this;
+}
+
 
 //PROPERTIES
 FiveGUI.GUISlider.prototype.getState = function() {
@@ -115,11 +135,25 @@ FiveGUI.GUISlider.prototype.getState = function() {
 
 FiveGUI.GUISlider.prototype.initializePathPoints = function() {
     if(this.getState() != "clicked") {
+        var caretWidth = 0;
+        var caretHeight = 0;
+        
+        var img = this.getCaretImage();
+        if(img instanceof Image && img.complete) {
+            caretWidth = img.width;
+            caretHeight = img.height;
+            this.effectiveWidth = this.getWidth() - caretWidth;
+        } else {
+            caretWidth = this.getHeight();
+            caretHeight = this.getHeight();
+            this.effectiveWidth = this.getWidth() - this.getHeight();
+        }
+        
         this.pathPoints = new Array (
-            {x:this.getX() + this.parent.getEventX()+this.caretPosition, y:this.getY() + this.parent.getEventY()},
-            {x:this.getX() + this.getHeight() + this.parent.getEventX() + this.caretPosition, y:this.getY() + this.parent.getEventY()},
-            {x:this.getX() + this.getHeight() + this.parent.getEventX() + this.caretPosition, y:this.getY() + this.getHeight() + this.parent.getEventY()},
-            {x:this.getX() + this.parent.getEventX() + this.caretPosition, y:this.getY() + this.getHeight()+this.parent.getEventY()}
+            {x:this.getX() + this.parent.getEventX() + this.caretPosition, y:this.getY() + this.parent.getEventY()},
+            {x:this.getX() + caretWidth + this.parent.getEventX() + this.caretPosition, y:this.getY() + this.parent.getEventY()},
+            {x:this.getX() + caretWidth + this.parent.getEventX() + this.caretPosition, y:this.getY() + caretHeight + this.parent.getEventY()},
+            {x:this.getX() + this.parent.getEventX() + this.caretPosition, y:this.getY() + caretHeight + this.parent.getEventY()}
         );
     } else {
         this.pathPoints = new Array (
@@ -153,9 +187,7 @@ FiveGUI.GUISlider.prototype.initialize = function(parent) {
             this["set"+FiveGUI.GUILib.capitalize(a)](this.defaults[a]);
         }
     }
-    
-    this.effectiveWidth = this.getWidth()-this.getHeight();
-    
+        
     this.initializePathPoints();
     this.bindListeners();    
 }
@@ -173,14 +205,25 @@ FiveGUI.GUISlider.prototype.addEventListener = function(type, func){
 
 FiveGUI.GUISlider.prototype.bindListeners = function() {
     this.addEventListener("mouseover", function(e, obj){
-        if(e.pageX >= obj.parent.getEventX() + obj.getX() + obj.getHeight()/2
-        && e.pageX <=  obj.parent.getEventX() + obj.getX() + obj.getHeight()/2 + obj.effectiveWidth) {
+        
+        var img = obj.getCaretImage();
+        var caretWidth = 0;
+        
+        if(img instanceof Image && img.complete) {
+            caretWidth = img.width/2;
+        } else {
+            caretWidth = obj.getHeight()/2;
+        }
+        
+        if(e.pageX >= obj.parent.getEventX() + obj.getX() + caretWidth
+        && e.pageX <=  obj.parent.getEventX() + obj.getX() + caretWidth + obj.effectiveWidth) {
             obj.changeState("hovered");
         } else {
             obj.changeState("normal");            
             obj.initializePathPoints();
             obj.bind();             
         }
+        
         obj.update(obj);
     });
     this.addEventListener("mouseout", function(e, obj){
@@ -192,14 +235,23 @@ FiveGUI.GUISlider.prototype.bindListeners = function() {
         obj.update(obj);
     });    
     this.addEventListener("mousemove", function(e, obj){
+        var img = obj.getCaretImage();
+        var caretWidth = 0;
+        
+        if(img instanceof Image && img.complete) {
+            caretWidth = img.width/2;
+        } else {
+            caretWidth = obj.getHeight()/2;
+        }        
+        
         if(obj.getState() == "clicked") {
-            if(e.pageX >= obj.parent.getEventX() + obj.getX() + obj.getHeight()/2
-            && e.pageX <=  obj.parent.getEventX() + obj.getX() + obj.getHeight()/2 + obj.effectiveWidth) {
-                var delta = e.pageX - (obj.parent.getEventX() + obj.getX() + obj.getHeight()/2);
+            if(e.pageX >= obj.parent.getEventX() + obj.getX() + caretWidth
+            && e.pageX <=  obj.parent.getEventX() + obj.getX() + caretWidth + obj.effectiveWidth) {
+                var delta = e.pageX - (obj.parent.getEventX() + obj.getX() + caretWidth);
                 obj.caretPosition = delta;
-            } else if(e.pageX > obj.parent.getEventX() + obj.getX() + obj.getHeight()/2 + obj.effectiveWidth) {
+            } else if(e.pageX > obj.parent.getEventX() + obj.getX() + caretWidth + obj.effectiveWidth) {
                 obj.caretPosition = obj.effectiveWidth;         
-            } else if(e.pageX < obj.parent.getEventX() + obj.getX() + obj.getHeight()/2) {
+            } else if(e.pageX < obj.parent.getEventX() + obj.getX() + caretWidth) {
                 obj.caretPosition = 0;             
             }
         }
@@ -222,7 +274,8 @@ FiveGUI.GUISlider.prototype.changeState = function(state) {
         case "hovered":
         case "clicked":
         case "normal": {
-            this.state = state;break;
+            this.state = state;
+            break;
         }
         default: {
             this.state = "normal";
@@ -269,8 +322,25 @@ FiveGUI.GUISlider.prototype.draw = function() {
 }
 
 FiveGUI.GUISlider.prototype.drawBasis = function() {
+    if(this.getBasisImage() instanceof Image) {
+        this.drawBasisImage();
+    } else {
+        this.drawBasisContour();
+    }
+}
+
+FiveGUI.GUISlider.prototype.drawBasisImage = function() {
     var dCtx = this.drawCtx;
-    dCtx.putImageData(this.mount, 0, 0);
+    var height = this.getHeight()/3+1;
+    if((this.getHeight()/3)%1 > 0) {
+        height = (this.getHeight()/3 - (this.getHeight()/3)%1)+1;
+    }
+
+    dCtx.drawImage(this.getBasisImage(), 0, height);
+}
+
+FiveGUI.GUISlider.prototype.drawBasisContour = function() {
+    var dCtx = this.drawCtx;
 
     // Contour drawing
     var border = this.getBorderWidth();
@@ -289,6 +359,7 @@ FiveGUI.GUISlider.prototype.drawBasis = function() {
     if((this.getHeight()/3)%1 > 0) {
         height = (this.getHeight()/3 - (this.getHeight()/3)%1)+1;
     }
+    
     dCtx.moveTo(lineWidthAmplifier,height);
     dCtx.lineTo(this.getWidth(), height);
     dCtx.lineTo(this.getWidth(), height*2+lineWidthAmplifier);
@@ -311,6 +382,38 @@ FiveGUI.GUISlider.prototype.drawBasis = function() {
 }
 
 FiveGUI.GUISlider.prototype.drawCaret = function() {
+    if(this.getCaretImage() instanceof Image) {
+        this.drawCaretImage();
+    } else {
+        this.drawCaretContour();
+    }    
+}
+
+FiveGUI.GUISlider.prototype.drawCaretImage = function() {
+    var dCtx = this.drawCtx;
+    dCtx.drawImage(this.getCaretImage(), this.caretPosition, 0);
+}
+
+FiveGUI.GUISlider.prototype.getCaretImage = function() {
+    if(typeof this['getState'] != "function") {
+        return this.caretImage;
+    } else {
+        switch(this['getState']()) {
+            case "clicked":{
+                return this.getClickCaretImage();
+            }
+            case "hovered":{
+                return this.getHoverCaretImage();
+            }
+            case "normal":
+            default: {
+                return this.caretImage;
+            }
+        }
+    }    
+}
+
+FiveGUI.GUISlider.prototype.drawCaretContour = function() {
     var dCtx = this.drawCtx;
 
     // Contour drawing
@@ -343,6 +446,6 @@ FiveGUI.GUISlider.prototype.drawCaret = function() {
     if(typeof background != "undefined") {
         dCtx.fillStyle = background;
         dCtx.fill();
-    }    
+    }
     dCtx.restore();
 }

@@ -37,8 +37,89 @@ FiveGUI.GUIRadiobutton = function (parameters) {
 FiveGUI.GUILib.extend(FiveGUI.GUIRadiobutton, FiveGUI.GUIElement);
 
 //GETTERS
+FiveGUI.GUIRadiobutton.prototype.getHoverBackgroundColor = function() {
+    return this.hoverBackgroundColor;
+}
+
+FiveGUI.GUIRadiobutton.prototype.getHoverBorderColor = function() {
+    return this.hoverBorderColor;
+}
+
+FiveGUI.GUIRadiobutton.prototype.getHoverBackgroundImage = function() {
+    return this.hoverBackgroundImage;
+}
+
+FiveGUI.GUIRadiobutton.prototype.getCheckedBackgroundImage = function() {
+    return this.checkedBackgroundImage;
+}
+
+FiveGUI.GUIRadiobutton.prototype.getHoverCheckedBackgroundImage = function() {
+    return this.hoverCheckedBackgroundImage;
+}
+
+FiveGUI.GUIRadiobutton.prototype.getState = function() {
+    return this.state;
+}
+FiveGUI.GUIRadiobutton.prototype.getCheckedBackgroundImage = function() {
+    if(typeof this['getState'] != "function") {
+        return this.checkedBackgroundImage;
+    } else {
+        switch(this['getState']()) {
+            case "clicked":{
+                return this.getClickCheckedBackgroundImage();
+            }
+            case "hovered":{
+                return this.getHoverCheckedBackgroundImage();
+            }
+            case "normal":
+            default: {
+                return this.checkedBackgroundImage;
+            }
+        }
+    }    
+}
+
+FiveGUI.GUIRadiobutton.prototype.changeState = function(state) {
+    switch(state) {
+        case "hovered":
+        case "clicked":
+        case "normal": {
+            this.state = state;
+            break;
+        }
+        default: {
+            this.state = "normal";
+        }
+    }
+    
+    return this;
+}
 
 //SETTERS
+FiveGUI.GUIRadiobutton.prototype.setHoverBackgroundColor = function(hbc) {
+    this.hoverBackgroundColor = hbc;
+    return this;
+}
+
+FiveGUI.GUIRadiobutton.prototype.setHoverBorderColor = function(hbc) {
+    this.hoverBorderColor = hbc;
+    return this;
+}
+
+FiveGUI.GUIRadiobutton.prototype.setHoverBackgroundImage = function(hbi) {
+    this.hoverBackgroundImage = hbi;
+    return this;
+}
+
+FiveGUI.GUIRadiobutton.prototype.setHoverCheckedBackgroundImage = function(hcbi) {
+    this.hoverCheckedBackgroundImage = hcbi;
+    return this;
+}
+
+FiveGUI.GUIRadiobutton.prototype.setCheckedBackgroundImage = function(cbi) {
+    this.checkedBackgroundImage = cbi;
+    return this;
+}
 
 //PROPERTIES
 FiveGUI.GUIRadiobutton.prototype.isChecked = function(isChecked) {
@@ -79,6 +160,15 @@ FiveGUI.GUIRadiobutton.prototype.bindListeners = function() {
         obj.parent.setFocused(this.id);
         obj.update(obj);
     });       
+    
+    this.addEventListener("mouseover", function(e, obj){
+        obj.changeState("hovered");
+        obj.update(obj);
+    });    
+    this.addEventListener("mouseout", function(e, obj){
+        obj.changeState("normal");
+        obj.update(obj);
+    });            
 }
 
 FiveGUI.GUIRadiobutton.prototype.update = function() {
@@ -145,7 +235,21 @@ FiveGUI.GUIRadiobutton.prototype.draw = function() {
     var dCtx = this.drawCtx;
     dCtx.putImageData(this.mount, 0, 0);
 
+    if(this.getBackgroundImage() instanceof Image) {
+        this.drawBackgroundImage();
+    } else {
+        this.drawContour();
+    }
+    
+    this.bind();
+    
+    return this.drawCanvas;    
+}
+
+FiveGUI.GUIRadiobutton.prototype.drawContour = function() {
     // Contour drawing
+    var dCtx = this.drawCtx;
+
     var border = this.getBorderWidth();
     var lineWidthAmplifier = 0;
         
@@ -187,8 +291,14 @@ FiveGUI.GUIRadiobutton.prototype.draw = function() {
         dCtx.stroke();
     }    
     
-    dCtx.restore();    
-    this.bind();
-    
-    return this.drawCanvas;    
+    dCtx.restore();        
+}
+
+FiveGUI.GUIRadiobutton.prototype.drawBackgroundImage = function() {
+    var dCtx = this.drawCtx;
+    if(this.isChecked()) {
+        dCtx.drawImage(this.getCheckedBackgroundImage(), 0, 0);
+    } else {
+        dCtx.drawImage(this.getBackgroundImage(), 0, 0);
+    }    
 }

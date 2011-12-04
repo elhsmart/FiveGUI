@@ -19,6 +19,25 @@ FiveGUI.GUIElement.prototype.getBorderWidth = function() {
     return this.borderWidth;
 }
 
+FiveGUI.GUIElement.prototype.getBackgroundImage = function() {
+    if(typeof this['getState'] != "function") {
+        return this.backgroundImage;
+    } else {
+        switch(this['getState']()) {
+            case "clicked":{
+                return this.getClickBackgroundImage();
+            }
+            case "hovered":{
+                return this.getHoverBackgroundImage();
+            }
+            case "normal":
+            default: {
+                return this.backgroundImage;
+            }
+        }
+    }    
+}
+
 FiveGUI.GUIElement.prototype.getBorderColor = function() {
     if(typeof this['getState'] != "function") {
         return this.borderColor;
@@ -55,10 +74,6 @@ FiveGUI.GUIElement.prototype.getBackgroundColor = function() {
             }
         }
     }    
-}
-
-FiveGUI.GUIElement.prototype.getBackgroundImage = function() {
-    return this.backgroundImage;
 }
 
 FiveGUI.GUIElement.prototype.getFontColor = function() {
@@ -226,7 +241,7 @@ FiveGUI.GUIElement.prototype.bind = function() {
     eCtx.closePath();
     eCtx.restore();
     
-    var dCtx = document.getElementById("testCanvas").getContext("2d");
+    /*var dCtx = document.getElementById("testCanvas").getContext("2d");
     
     dCtx.save();
     //dCtx.clearRect(0,0,dCtx.canvas.width, dCtx.canvas.height);
@@ -240,5 +255,5 @@ FiveGUI.GUIElement.prototype.bind = function() {
     
     dCtx.closePath();
     dCtx.stroke();
-    dCtx.restore();    
+    dCtx.restore();    */
 }

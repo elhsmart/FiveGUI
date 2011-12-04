@@ -24,6 +24,7 @@ FiveGUI.GUIButton = function (parameters) {
     this.y = 0;
     this.width = 0;
     this.height = 0;
+    this.value = '';
     
     if(typeof parameters == "object") {
         var a = null;
@@ -76,6 +77,14 @@ FiveGUI.GUIButton.prototype.getTextClickColor = function() {
     return this.textClickColor;
 }
 
+FiveGUI.GUIButton.prototype.getHoverBackgroundImage = function() {
+    return this.backgroundHoverImage;
+}
+
+FiveGUI.GUIButton.prototype.getClickBackgroundImage = function() {
+    return this.backgroundClickImage;
+}
+
 FiveGUI.GUIButton.prototype.getState = function() {
     if(this.state == undefined) {
         this.state = "normal";
@@ -110,13 +119,28 @@ FiveGUI.GUIButton.prototype.setClickBackgroundColor = function(cbc) {
     return this;
 }
 
-FiveGUI.GUIButton.prototype.setHoverBorderColor = function(hb) {
-    this.hoverBorderColor = hb;
+FiveGUI.GUIButton.prototype.setHoverBorderColor = function(hbc) {
+    this.hoverBorderColor = hbc;
     return this;
 }
 
-FiveGUI.GUIButton.prototype.setClickBorderColor = function(cb) {
-    this.clickBorderColor = cb;
+FiveGUI.GUIButton.prototype.setClickBorderColor = function(cbc) {
+    this.clickBorderColor = cbc;
+    return this;
+}
+
+FiveGUI.GUIButton.prototype.setBackgroundImage = function(bi) {
+    this.backgroundImage = bi;
+    return this;
+}
+
+FiveGUI.GUIButton.prototype.setHoverBackgroundImage = function(bhi) {
+    this.backgroundHoverImage = bhi;
+    return this;
+}
+
+FiveGUI.GUIButton.prototype.setClickBackgroundImage = function(bci) {
+    this.backgroundClickImage = bci;
     return this;
 }
 
@@ -220,10 +244,39 @@ FiveGUI.GUIButton.prototype.draw = function() {
             this.getX(), this.getY(), this.getX()+this.getWidth(), this.getY()+this.getHeight()
         ));
     }
-  
+    
     var dCtx = this.drawCtx;
-    dCtx.putImageData(this.mount, 0, 0);
+    dCtx.putImageData(this.mount, 0, 0); 
+    
+    if(this.getBackgroundImage() instanceof Image) {
+        this.drawBackgroundImage();
+    } else {
+        this.drawContour();
+    }   
+    
+    // Inner Text
+    var caption = this.getCaption();
+    if(caption != undefined) {
+        var color           = this.getFontColor();        
+        var font            = this.getFontName();        
+        var size            = this.getFontSize();
+        
+        dCtx.fillStyle      = color;
+        dCtx.font           = size+"px "+font;
+        dCtx.textAlign      = "center";
+        dCtx.textBaseline   = "middle";
+        
+        dCtx.fillText(caption, this.getWidth()/2, this.getHeight()/2);
+    }
+    
+    dCtx.restore();    
+    this.bind();
+    
+    return this.drawCanvas;
+}
 
+FiveGUI.GUIButton.prototype.drawContour = function() {
+    var dCtx = this.drawCtx;
     // Contour drawing
     var border = this.getBorderWidth();
     var lineWidthAmplifier = 0;
@@ -252,24 +305,10 @@ FiveGUI.GUIButton.prototype.draw = function() {
     if(typeof background != "undefined") {
         dCtx.fillStyle = background;
         dCtx.fill();
-    }
-    
-    // Inner Text
-    var caption = this.getCaption();
-    if(caption != undefined) {
-        var color           = this.getFontColor();        
-        var font            = this.getFontName();        
-        var size            = this.getFontSize();
-        
-        dCtx.fillStyle      = color;
-        dCtx.font           = size+"px "+font;
-        dCtx.textAlign      = "center";
-        dCtx.textBaseline   = "middle";
-        
-        dCtx.fillText(caption, this.getWidth()/2, this.getHeight()/2);
-    }
-    dCtx.restore();    
-    this.bind();
-    
-    return this.drawCanvas;
+    }    
+}
+
+FiveGUI.GUIButton.prototype.drawBackgroundImage = function() {
+    var dCtx = this.drawCtx;
+    dCtx.drawImage(this.getBackgroundImage(), 0, 0);
 }

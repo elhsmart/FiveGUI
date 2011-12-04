@@ -127,7 +127,10 @@ FiveGUI.GUIRegion.prototype.bindSubElements = function(defaults) {
         for(a in defaults) {
             var methodName = "set"+a.capitalize();
             if(typeof this.elements[b][methodName] == "function") {
-                if(this.elements[b]["get"+a.capitalize()]() == undefined) {
+                if(
+                    this.elements[b]["get"+a.capitalize()]() == undefined &&
+                    typeof this.elements[b]["get"+a.capitalize()]() == "undefined"
+                ) {
                     this.elements[b][methodName](defaults[a]);
                 }
             }
@@ -159,6 +162,34 @@ FiveGUI.GUIRegion.prototype.draw = function() {
         throw new Error("Region dimensions not set - width:" + this.getWindth() + ", height:"+this.getHeight());
     }
     
+    if(this.getBackgroundImage() instanceof Image) {
+        this.drawBackgroundImage();
+    } else {
+        this.drawContour();
+    }       
+    
+    this.bind();
+    
+    var a = null;
+    for(a in this.elements) {
+        var drawData = this.elements[a].draw();
+        if(drawData instanceof HTMLCanvasElement) {
+            dCtx.drawImage(drawData, this.elements[a].getX(), this.elements[a].getY()); 
+        }
+    }
+    
+    return this.drawCanvas;
+}
+
+FiveGUI.GUIRegion.prototype.drawBackgroundImage = function() {
+    var dCtx = this.drawCtx;
+    dCtx.drawImage(this.getBackgroundImage(), 0, 0);
+    
+}
+
+FiveGUI.GUIRegion.prototype.drawContour = function() {
+    var dCtx = this.drawCtx;
+
     var border = this.getBorderWidth();
     var lineWidthAmplifier  = 0;
     
@@ -189,16 +220,5 @@ FiveGUI.GUIRegion.prototype.draw = function() {
         dCtx.fill();
     }
     
-    dCtx.restore();
-    this.bind();
-    
-    var a = null;
-    for(a in this.elements) {
-        var drawData = this.elements[a].draw();
-        if(drawData instanceof HTMLCanvasElement) {
-            dCtx.drawImage(drawData, this.elements[a].getX(), this.elements[a].getY()); 
-        }
-    }
-    
-    return this.drawCanvas;
+    dCtx.restore();    
 }

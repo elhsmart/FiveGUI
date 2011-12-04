@@ -308,13 +308,22 @@ FiveGUI.GUITextfield.prototype.draw = function() {
             this.getX(), this.getY(), this.getX()+this.getWidth(), this.getY()+this.getHeight()
         ));
     }
- 
-    this.drawContour();
+
+    if(this.getBackgroundImage() instanceof Image) {
+        this.drawBackgroundImage();
+    } else {
+        this.drawContour();
+    }   
     this.drawCarret(); 
     
     this.bind();
         
     return this.drawCanvas;    
+}
+
+FiveGUI.GUITextfield.prototype.drawBackgroundImage = function() {
+    var dCtx = this.drawCtx;
+    dCtx.drawImage(this.getBackgroundImage(), 0, 0);
 }
 
 FiveGUI.GUITextfield.prototype.drawContour = function() {

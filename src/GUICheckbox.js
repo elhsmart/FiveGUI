@@ -37,8 +37,74 @@ FiveGUI.GUICheckbox = function (parameters) {
 FiveGUI.GUILib.extend(FiveGUI.GUICheckbox, FiveGUI.GUIElement);
 
 //GETTERS
+FiveGUI.GUICheckbox.prototype.getHoverBackgroundColor = function() {
+    return this.hoverBackgroundColor;
+}
+
+FiveGUI.GUICheckbox.prototype.getHoverBorderColor = function() {
+    return this.hoverBorderColor;
+}
+
+FiveGUI.GUICheckbox.prototype.getHoverBackgroundImage = function() {
+    return this.hoverBackgroundImage;
+}
+
+FiveGUI.GUICheckbox.prototype.getCheckedBackgroundImage = function() {
+    return this.checkedBackgroundImage;
+}
+
+FiveGUI.GUICheckbox.prototype.getHoverCheckedBackgroundImage = function() {
+    return this.hoverCheckedBackgroundImage;
+}
+
+FiveGUI.GUICheckbox.prototype.getState = function() {
+    return this.state;
+}
+FiveGUI.GUICheckbox.prototype.getCheckedBackgroundImage = function() {
+    if(typeof this['getState'] != "function") {
+        return this.checkedBackgroundImage;
+    } else {
+        switch(this['getState']()) {
+            case "clicked":{
+                return this.getClickCheckedBackgroundImage();
+            }
+            case "hovered":{
+                return this.getHoverCheckedBackgroundImage();
+            }
+            case "normal":
+            default: {
+                return this.checkedBackgroundImage;
+            }
+        }
+    }    
+}
 
 //SETTERS
+FiveGUI.GUICheckbox.prototype.setHoverBackgroundColor = function(hbc) {
+    this.hoverBackgroundColor = hbc;
+    return this;
+}
+
+FiveGUI.GUICheckbox.prototype.setHoverBorderColor = function(hbc) {
+    this.hoverBorderColor = hbc;
+    return this;
+}
+
+FiveGUI.GUICheckbox.prototype.setHoverBackgroundImage = function(hbi) {
+    this.hoverBackgroundImage = hbi;
+    return this;
+}
+
+FiveGUI.GUICheckbox.prototype.setHoverCheckedBackgroundImage = function(hcbi) {
+    this.hoverCheckedBackgroundImage = hcbi;
+    return this;
+}
+
+FiveGUI.GUICheckbox.prototype.setCheckedBackgroundImage = function(cbi) {
+    this.checkedBackgroundImage = cbi;
+    return this;
+}
+
 
 //PROPERTIES
 FiveGUI.GUICheckbox.prototype.isChecked = function(isChecked) {
@@ -50,7 +116,8 @@ FiveGUI.GUICheckbox.prototype.isChecked = function(isChecked) {
         switch(isChecked) {
             case true:
             case false: {
-                this.checked = isChecked;break;
+                this.checked = isChecked;
+                break;
             }
             default: {
                 this.checked = false;
@@ -58,6 +125,22 @@ FiveGUI.GUICheckbox.prototype.isChecked = function(isChecked) {
         }
     }
     return this.checked;
+}
+
+FiveGUI.GUICheckbox.prototype.changeState = function(state) {
+    switch(state) {
+        case "hovered":
+        case "clicked":
+        case "normal": {
+            this.state = state;
+            break;
+        }
+        default: {
+            this.state = "normal";
+        }
+    }
+    
+    return this;
 }
 
 //METHODS
@@ -70,7 +153,15 @@ FiveGUI.GUICheckbox.prototype.bindListeners = function() {
         }
         obj.parent.setFocused(this.id);
         obj.update(obj);
-    });       
+    });
+    this.addEventListener("mouseover", function(e, obj){
+        obj.changeState("hovered");
+        obj.update(obj);
+    });    
+    this.addEventListener("mouseout", function(e, obj){
+        obj.changeState("normal");
+        obj.update(obj);
+    });        
 }
 
 FiveGUI.GUICheckbox.prototype.update = function() {
@@ -138,6 +229,28 @@ FiveGUI.GUICheckbox.prototype.draw = function() {
     dCtx.putImageData(this.mount, 0, 0);
 
     // Contour drawing
+
+    if(this.getBackgroundImage() instanceof Image) {
+        this.drawBackgroundImage();
+    } else {
+        this.drawContour();
+    }
+
+    this.bind();
+    return this.drawCanvas;    
+}
+
+FiveGUI.GUICheckbox.prototype.drawBackgroundImage = function() {
+    var dCtx = this.drawCtx;
+    if(this.isChecked()) {
+        dCtx.drawImage(this.getCheckedBackgroundImage(), 0, 0);
+    } else {
+        dCtx.drawImage(this.getBackgroundImage(), 0, 0);
+    }
+}
+
+FiveGUI.GUICheckbox.prototype.drawContour = function() {
+    var dCtx = this.drawCtx;
     var border = this.getBorderWidth();
     var lineWidthAmplifier = 0;
         
@@ -180,7 +293,4 @@ FiveGUI.GUICheckbox.prototype.draw = function() {
     }
     
     dCtx.restore();    
-    this.bind();
-        
-    return this.drawCanvas;    
 }

@@ -54,13 +54,19 @@ FiveGUI.GUIProgressbar.prototype.getForegroundColor = function() {
 FiveGUI.GUIProgressbar.prototype.getValue = function() {
     return this.value;
 }
+FiveGUI.GUIProgressbar.prototype.getForegroundImage = function() {
+    return this.foregroundImage;
+}
 
 //SETTERS
 FiveGUI.GUIProgressbar.prototype.setForegroundColor = function(fc) {
     this.foregroundColor = fc;
     return this;
 }
-
+FiveGUI.GUIProgressbar.prototype.setForegroundImage = function(fi) {
+    this.foregroundImage = fi;
+    return this;
+}
 FiveGUI.GUIProgressbar.prototype.setValue = function(v) {
     this.value = v;
     return this;
@@ -115,14 +121,56 @@ FiveGUI.GUIProgressbar.prototype.draw = function() {
 
     // Contour drawing
     
-    this.drawContour();
-    this.drawForeground();
+    if(this.getBackgroundImage() instanceof Image) {
+        this.drawBackgroundImage();
+    } else {
+        this.drawContour();
+    }
+    
+    if(this.getForegroundImage() instanceof Image) {
+        this.drawForegroundImage();        
+    } else {
+        this.drawForeground();
+    }    
     
     return this.drawCanvas;
 }
 
+FiveGUI.GUIProgressbar.prototype.drawBackgroundImage = function() {
+    var dCtx = this.drawCtx;
+    dCtx.drawImage(this.getBackgroundImage(), 0, 0);    
+}
+
+FiveGUI.GUIProgressbar.prototype.drawForegroundImage = function() {
+    
+    var dCtx = this.drawCtx;
+    dCtx.save();
+
+    if(this.getValue() > 0) {
+        dCtx.save();
+        dCtx.drawImage(this.getForegroundImage(), 0, this.getWidth());
+                
+        var border = this.getBorderWidth();
+        var lineWidthAmplifier = 0;
+
+        if(typeof border != "undefined" && border != 0) {
+            dCtx.strokeStyle     = this.getBorderColor();
+            dCtx.lineWidth       = border;
+            lineWidthAmplifier  = border/2;
+        } 
+        
+        var width = ((this.getWidth()-(lineWidthAmplifier*2)) / 100) * this.getValue();
+
+        dCtx.drawImage(this.getForegroundImage(), lineWidthAmplifier, lineWidthAmplifier, width, this.getHeight()-lineWidthAmplifier*2);
+        dCtx.restore();
+    }
+    
+}
+
+
 FiveGUI.GUIProgressbar.prototype.drawContour = function() {
     var dCtx = this.drawCtx;
+    dCtx.save();
     var border = this.getBorderWidth();
     var lineWidthAmplifier = 0;
         

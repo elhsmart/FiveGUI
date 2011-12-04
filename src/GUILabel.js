@@ -113,7 +113,7 @@ FiveGUI.GUILabel.prototype.draw = function() {
     
     // Inner Fill
     var background = this.getBackgroundColor();
-    if(typeof background != "undefined") {
+    if(typeof background != "undefined" && background != null) {
         dCtx.fillStyle = background;
         dCtx.fill();
     }

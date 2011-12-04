@@ -483,7 +483,11 @@ FiveGUI.GUITextarea.prototype.draw = function() {
         this.setTextVerticalPosition(this.getTextVerticalPosition() - this.getFontSize());
     }
  
-    this.drawContour();
+    if(this.getBackgroundImage() instanceof Image) {
+        this.drawBackgroundImage();
+    } else {
+        this.drawContour();
+    }   
     this.drawCarret();
     this.drawText();
     
@@ -491,7 +495,11 @@ FiveGUI.GUITextarea.prototype.draw = function() {
         
     return this.drawCanvas;    
 }
-
+FiveGUI.GUITextarea.prototype.drawBackgroundImage = function() {
+    var dCtx = this.drawCtx;
+    
+    dCtx.drawImage(this.getBackgroundImage(), 0, 0);    
+}
 FiveGUI.GUITextarea.prototype.drawText = function() {
     
     var textWidth = 0;
